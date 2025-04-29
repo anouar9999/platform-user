@@ -23,7 +23,7 @@ export const Profile = () => {
     
     if (!storedUsername || !storedAdminId) {
       // Redirect to login page if credentials are missing
-      router.push('/auth/auth1/login');
+      router.push('/login');
     } else {
       setAdminName(storedUsername);
     }
@@ -35,7 +35,7 @@ export const Profile = () => {
     localStorage.removeItem('adminUsername');
     
     // Redirect to the login page
-    router.push('/auth/auth1/login');
+    router.push('/login');
   };
   // If there's no admin name, don't render the component
   if (!adminName) {
@@ -62,7 +62,7 @@ export const Profile = () => {
               onClick={handleSignOut}
                 color="primary"
                 component={Link}
-                href="/auth/auth1/login"
+                href="/login"
                 aria-label="logout"
                 size="small"
               >

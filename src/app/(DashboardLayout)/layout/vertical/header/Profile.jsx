@@ -31,7 +31,7 @@ const ProfileDropdown = () => {
     const storedAvatarUrl = localStorage.getItem('avatarUrl');
 
     if (!storedUsername || !storedUserId) {
-      router.push('/auth/auth1/login');
+      router.push('/login');
     } else {
       setUserName(storedUsername);
       setUserType(storedUserType || 'User');
