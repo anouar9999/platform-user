@@ -6,43 +6,20 @@ import Sidebar from './layout/vertical/sidebar/Sidebar';
 import { Home, Trophy, Users, GamepadIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import VotePopup from './VotePopup'; // Import the VotePopup component
+import VotePopup from './VotePopup'; 
+import CookiesModal from './CookiesModal'; // Import the simplified expandable modal
 
 const Layout = ({ children }) => {
   const [showGlow, setShowGlow] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const pathname = usePathname();
   const [showVotePopup, setShowVotePopup] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(null);
-  const pathname = usePathname();
-
-  // Define all possible questions
-  const questions = [
-    {
-      id: 'experience',
-      title: 'Rate Your Experience',
-      description: "We'd love to hear your feedback on our platform!",
-    },
-    {
-      id: 'difficulty',
-      title: 'Game Difficulty',
-      description: 'How would you rate the difficulty of our games?',
-    },
-    {
-      id: 'features',
-      title: 'Favorite Feature',
-      description: 'Which feature do you enjoy the most?',
-    },
-    {
-      id: 'improvement',
-      title: 'What Needs Improvement?',
-      description: 'Which aspect should we focus on improving first?',
-    },
-    {
-      id: 'recommendation',
-      title: 'Would You Recommend Us?',
-      description: 'Would you recommend our platform to friends?',
-    },
-  ];
+  
+  // Function to get a random question (placeholder)
+  const getRandomQuestion = () => {
+    return "Sample question"; 
+  };
 
   useEffect(() => {
     let timer;
@@ -52,36 +29,19 @@ const Layout = ({ children }) => {
     return () => clearTimeout(timer);
   }, [showGlow]);
 
-  // Function to get a random question that hasn't been asked recently
-  const getRandomQuestion = () => {
-    // Get recently asked question IDs from localStorage
-    const recentQuestionsString = localStorage.getItem('recentQuestions') || '[]';
-    const recentQuestions = JSON.parse(recentQuestionsString);
-
-    // Filter out recently asked questions
-    const availableQuestions = questions.filter((q) => !recentQuestions.includes(q.id));
-
-    // If all questions have been asked recently, reset and use all questions
-    const questionPool = availableQuestions.length > 0 ? availableQuestions : questions;
-
-    // Select a random question
-    const randomIndex = Math.floor(Math.random() * questionPool.length);
-    return questionPool[randomIndex];
-  };
-
   // Effect to show the vote popup periodically
   useEffect(() => {
-    // Initial timer to show first popup after a short delay (e.g., 10 seconds)
+    // Initial timer to show first popup after a short delay
     const initialTimer = setTimeout(() => {
       setCurrentQuestion(getRandomQuestion());
       setShowVotePopup(true);
-    }, 10000); // 10 seconds for first popup
+    }, 10000); 
 
-    // Setup periodic timer for subsequent popups (every 2 minutes)
+    // Setup periodic timer for subsequent popups
     const periodicTimer = setInterval(() => {
       setCurrentQuestion(getRandomQuestion());
       setShowVotePopup(true);
-    }, 2 * 60 * 1000); // 2 minutes
+    }, 2 * 60 * 1000); 
 
     return () => {
       clearTimeout(initialTimer);
@@ -89,28 +49,20 @@ const Layout = ({ children }) => {
     };
   }, []);
 
-  // Function to handle vote popup close
-  const handleVoteClose = (questionId, answer) => {
-    setShowVotePopup(false);
+  // Cookie consent handlers
+  const handleCookieAccept = (preferences) => {
+    console.log('Cookies accepted:', preferences);
+    // Initialize your analytics, marketing scripts, etc.
+  };
 
-    if (questionId && answer) {
-      // Store the answer
-      const votesHistory = JSON.parse(localStorage.getItem('votesHistory') || '{}');
-      votesHistory[questionId] = answer;
-      localStorage.setItem('votesHistory', JSON.stringify(votesHistory));
+  const handleCookieReject = (preferences) => {
+    console.log('Cookies rejected:', preferences);
+    // Ensure only necessary cookies are used
+  };
 
-      // Track this question as recently asked
-      const recentQuestions = JSON.parse(localStorage.getItem('recentQuestions') || '[]');
-
-      // Add the current question to recent questions
-      if (!recentQuestions.includes(questionId)) {
-        // Keep only the last 3 questions to ensure rotation
-        const updatedRecentQuestions = [...recentQuestions, questionId].slice(-3);
-        localStorage.setItem('recentQuestions', JSON.stringify(updatedRecentQuestions));
-      }
-
-      console.log(`Saved vote: ${questionId} = ${answer}`);
-    }
+  const handleSavePreferences = (preferences) => {
+    console.log('Custom preferences saved:', preferences);
+    // Initialize only the allowed services
   };
 
   return (
@@ -138,17 +90,53 @@ const Layout = ({ children }) => {
         <Header setIsMobileOpen={setIsMobileOpen} />
         <div className="flex flex-1">
           <Sidebar isMobileOpen={isMobileOpen} setIsMobileOpen={setIsMobileOpen} />
-          <main className="font-pilot flex-1 flex flex-col  mt-8 mb-4">
-           
-
+          <main className="font-pilot flex-1 flex flex-col mt-8 mb-4">
             <div className="sm:pl-16 md:pl-18">{children}</div>
           </main>
         </div>
-           {/* Footer section */}
-      
       </div>
 
-      {/* Vote Popup */}
+    
+      
+      {/* Final Simplified Modal */}
+      <CookiesModal 
+        title="About Your Privacy"
+        description="We process your data to deliver content or advertisements and measure the delivery of such content or advertisements to extract insights about our website. We share this information with our partners on the basis of consent and legitimate interest. You may exercise your right to consent or object to a legitimate interest, based on a specific purpose below or at a partner level in the link under each purpose. These choices will be signaled to our vendors."
+        acceptAllButtonText="Allow all"
+        customizeButtonText="Manage Consent Preferences"
+        submitChoicesText="Submit My Choices"
+        rejectAllButtonText="Reject all"
+        primaryColor="#1a1a3a" // Dark blue/navy color from image
+        cookieOptions={[
+          {
+            id: 'necessary',
+            name: 'Strictly Necessary Cookies',
+            description: 'These cookies are essential for the website to function properly and cannot be disabled.',
+            isRequired: true,
+          },
+          {
+            id: 'functional',
+            name: 'Functional Cookies',
+            description: 'These cookies enable personalized features and remember your preferences.',
+            isRequired: false,
+          },
+          {
+            id: 'performance',
+            name: 'Performance Cookies',
+            description: 'These cookies help us understand how visitors interact with our website, helping us improve our site and services.',
+            isRequired: false,
+          },
+          {
+            id: 'marketing',
+            name: 'Personalised ads and content measurement, audience insights and product development',
+            description: 'These cookies are used to deliver advertisements more relevant to you and your interests, limit the number of times you see an advertisement, and understand user behavior.',
+            isRequired: false,
+          }
+        ]}
+        onAccept={handleCookieAccept}
+        onReject={handleCookieReject}
+        onSavePreferences={handleSavePreferences}
+      />
     </div>
   );
 };
