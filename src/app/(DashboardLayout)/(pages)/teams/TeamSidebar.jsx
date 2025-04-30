@@ -1358,7 +1358,7 @@ const TeamSidebar = ({ isOpen, onClose, team, onTeamUpdate }) => {
                                     className="bg-gray-800/70 border-gray-700/50 focus:border-primary/70 transition-all duration-300 group-hover/field:border-gray-600/70"
                                   />
                                   <p className="text-xs text-gray-500 mt-2 ml-2 group-hover/field:text-gray-400 transition-colors">
-                                    Your team's full name
+                                    Your teams full name
                                   </p>
                                 </div>
 
@@ -1457,7 +1457,7 @@ const TeamSidebar = ({ isOpen, onClose, team, onTeamUpdate }) => {
                                     />
                                     <div className="absolute top-1/2 left-3 transform -translate-y-1/2 text-blue-400"></div>
                                     <p className="text-xs text-gray-500 mt-2 ml-2 group-hover/field:text-gray-400 transition-colors">
-                                      Team's Twitter/X handle (@username)
+                                      Teams Twitter/X handle (@username)
                                     </p>
                                   </div>
                                 </div>

@@ -272,42 +272,43 @@ const MultiGroupRoundRobinTournament = ({ tournamentId }) => {
             onOpenModal={handleOpenModal}
           />
         );
-      case 'playoffs':
-        if (playoffLoading) {
-          return (
-            <div className="min-h-[400px] flex items-center justify-center">
-              <FaSpinner className="animate-spin text-4xl text-primary mx-auto" />
-              <p className="ml-3 text-lg">Loading playoff bracket...</p>
-            </div>
-          );
-        }
+      // case 'playoffs':
+      //   if (playoffLoading) {
+      //     return (
+      //       <div className="min-h-[400px] flex items-center justify-center">
+      //         <FaSpinner className="animate-spin text-4xl text-primary mx-auto" />
+      //         <p className="ml-3 text-lg">Loading playoff bracket...</p>
+      //       </div>
+      //     );
+      //   }
         
-        if (!playoffData || !playoffData.has_playoffs) {
-          return (
-            <div className="min-h-[400px] flex flex-col items-center justify-center">
-              <p className="text-xl mb-6">No playoff bracket has been created yet.</p>
-              <button
-                onClick={createPlayoffs}
-                disabled={!areAllMatchesCompleted()}
-                className={`px-6 py-3 rounded-lg ${
-                  areAllMatchesCompleted() 
-                    ? 'bg-primary text-white hover:bg-orange-600' 
-                    : 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                } transition-colors`}
-              >
-                Create Playoff Bracket
-              </button>
-              {!areAllMatchesCompleted() && (
-                <p className="text-sm text-gray-400 mt-3">
-                  All group matches must be completed before creating playoffs
-                </p>
-              )}
-            </div>
-          );
-        }
+      //   if (!playoffData || !playoffData.has_playoffs) {
+      //     return (
+      //       <div className="min-h-[400px] flex flex-col items-center justify-center">
+      //         <p className="text-xl mb-6">No playoff bracket has been created yet.</p>
+      //         <button
+      //           onClick={createPlayoffs}
+      //           disabled={!areAllMatchesCompleted()}
+      //           className={`px-6 py-3 rounded-lg ${
+      //             areAllMatchesCompleted() 
+      //               ? 'bg-primary text-white hover:bg-orange-600' 
+      //               : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+      //           } transition-colors`}
+      //         >
+      //           Create Playoff Bracket
+      //         </button>
+      //         {!areAllMatchesCompleted() && (
+      //           <p className="text-sm text-gray-400 mt-3">
+      //             All group matches must be completed before creating playoffs
+      //           </p>
+      //         )}
+      //       </div>
+      //     );
+      //   }
         
-        return <PlayoffsBracket bracketData={playoffData.bracket} />;
-      default:
+      //   return <PlayoffsBracket bracketData={playoffData.bracket} />;
+      
+        default:
         return <GroupsOverview groups={groups} />;
     }
   };
