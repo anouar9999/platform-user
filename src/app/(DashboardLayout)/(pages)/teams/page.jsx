@@ -404,11 +404,11 @@ const TeamCard = ({ team, onClick, isInMyTeams }) => (
     onClick={() => onClick(team)}
   >
     <div className="relative aspect-video">
-      {team.banner ? (
+      {team.logo ? (
         <div className="relative w-full h-full">
           <img
             className="w-full h-full object-cover"
-            src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${team.banner}`}
+            src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${team.logo}`}
             alt={`${team.name} banner`}
           />
           {/* Image overlay */}
@@ -422,7 +422,7 @@ const TeamCard = ({ team, onClick, isInMyTeams }) => (
           {team.logo ? (
             <img 
               className="w-16 h-16 sm:w-20 sm:h-20 object-contain" 
-              src={team.logo} 
+              src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${team.logo}`}
               alt={`${team.name} logo`} 
             />
           ) : (

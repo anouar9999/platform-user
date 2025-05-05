@@ -163,7 +163,30 @@ const CreateTeamForm = ({ isOpen, onClose, currentUser, onFinish }) => {
   const [logoPreview, setLogoPreview] = useState(null);
   const [bannerPreview, setBannerPreview] = useState(null);
   const { addToast } = useToast();
+  const [Games, setGames] = useState();
 
+  useEffect(() => {
+    const fetchTournaments = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/all_games.php`);
+        const data = await response.json();
+  
+        if (data.success) {
+          setGames(data.games);
+          console.log(data.games)
+        } else {
+          throw new Error(data.message || 'Failed to fetch tournaments');
+        }
+      } catch (err) {
+        console.log(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+   
+    fetchTournaments();
+  }, []);
   useEffect(() => {
     if (!isOpen) {
       resetForm();
@@ -560,17 +583,17 @@ const CreateTeamForm = ({ isOpen, onClose, currentUser, onFinish }) => {
           <div className="grid grid-cols-1 gap-6">
             {/* Game Banner Cards - Replaces the FloatingSelectField */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-2">
-              {OPTIONS.games.map((game) => (
+              {Games.map((game) => (
                 <div
                   key={game.value}
                   className={`relative cursor-pointer rounded-lg border-2 overflow-hidden transition-all duration-200 ${
-                    formData.game_id === parseInt(game.value) 
+                    formData.game_id === parseInt(game.id) 
                       ? 'border-primary shadow-md' 
                       : 'border-none  '
                   }`}
                   onClick={() => setFormData((prev) => ({ 
                     ...prev, 
-                    game_id: parseInt(game.value) 
+                    game_id: parseInt(game.id) 
                   }))}
                 >
                   {/* Game Image */}
@@ -584,11 +607,11 @@ const CreateTeamForm = ({ isOpen, onClose, currentUser, onFinish }) => {
                   
                   {/* Game Name Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex items-end p-3">
-                    <h3 className="text-white font-custom tracking-wider text-2xl">{game.label}</h3>
+                    <h3 className="text-white font-custom tracking-wider text-2xl">{game.name}</h3>
                   </div>
                   
                   {/* Selected indicator */}
-                  {formData.game_id === parseInt(game.value) && (
+                  {formData.game_id === parseInt(game.id) && (
                     <div className="absolute top-2 right-2 bg-primary rounded-full p-1">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />

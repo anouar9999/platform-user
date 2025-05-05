@@ -38,7 +38,7 @@ const ParticipantOrTeamCard = ({ item }) => {
         {avatarSrc ? (
           <img
             className="w-full h-full object-cover"
-            src={`${avatarSrc}`}
+            src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${avatarSrc}`}
             alt={`${process.env.NEXT_PUBLIC_BACKEND_URL}${isTeam ? item.team_name : item.username}'s avatar`}
             width={192}
             height={128}
