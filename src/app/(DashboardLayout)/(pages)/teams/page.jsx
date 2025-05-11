@@ -430,7 +430,7 @@ const TeamCard = ({ team, onClick, isInMyTeams }) => (
           )}
         </div>
       )}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-2 sm:p-2">
+      <div className="absolute bottom-1 left-1 right-0 bg-gradient-to-t from-black to-transparent p-2 sm:p-2">
         <h5 className="text-lg sm:text-xl font-custom tracking-widest text-white truncate">
           {team.name}
         </h5>

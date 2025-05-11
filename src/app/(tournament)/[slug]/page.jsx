@@ -77,7 +77,7 @@ const TabComponent = ({ activeTab, onTabChange, tournament }) => {
                     {/* Background Game Image Layer */}
                     <div className="absolute inset-0 z-0">
                       <img
-                        src={'https://i.ytimg.com/vi/HA29W7J8dQE/maxresdefault.jpg'}
+                        src={tournament.game_image}
                         alt={tournament.game_name || 'Tournament Game'}
                         className="w-full h-full object-cover"
                         onError={(e) => {
@@ -133,16 +133,16 @@ const TabComponent = ({ activeTab, onTabChange, tournament }) => {
                               label="Participation type"
                             />
                             <InfoCard
-                                icon={
-                                  <img
+                              icon={
+                                <img
                                   className='rounded-lg'
-                                    width={'50px'}
-                                    src={`${tournament.game_image}`}
-                                  />
-                                }
-                                value={tournament.game_name}
-                                label="Tournament Game"
-                              />
+                                  width={'50px'}
+                                  src={`${tournament.game_image}`}
+                                />
+                              }
+                              value={tournament.game_name}
+                              label="Tournament Game"
+                            />
                           </div>
                         </div>
                       </div>
@@ -151,17 +151,17 @@ const TabComponent = ({ activeTab, onTabChange, tournament }) => {
                 </div>
               </div>
             </div>
-            <div className=" text-primary">      
-        <h3 className="text-lg font-valorant mb-4 flex items-center">
-              <AlertCircle className="w-5 h-5 mr-2 text-primary" />
-              Tournament Rules
-            </h3>
-            <h3 className="font-pilot text-lg  my-4"></h3>
-            <p className="text-sm text-gray-400 ta">   {tournament.rules.split('\n').map((rule, index) => (
-                  <p key={index}>{rule}</p>
-                ))}</p>
-          </div>
-         
+            <div className=" text-primary">
+              <h3 className="text-lg font-valorant mb-4 flex items-center">
+                <AlertCircle className="w-5 h-5 mr-2 text-primary" />
+                Tournament Rules
+              </h3>
+              <h3 className="font-pilot text-lg  my-4"></h3>
+              <p className="text-sm text-gray-400 ta">   {tournament.rules.split('\n').map((rule, index) => (
+                <p key={index}>{rule}</p>
+              ))}</p>
+            </div>
+
           </div>
         );
       case 'Participants':
@@ -172,9 +172,9 @@ const TabComponent = ({ activeTab, onTabChange, tournament }) => {
         } else if (tournament.bracket_type === 'Double Elimination') {
           return <DoubleTournament />;
         } else if (tournament.bracket_type === 'Battle Royale') {
-          return <BattleRoyale  tournamentId={tournament.id} />;
+          return <BattleRoyale tournamentId={tournament.id} />;
         } else {
-          return <RoundRobinTournament tournamentId={tournament.id}/>;
+          return <RoundRobinTournament tournamentId={tournament.id} />;
         }
       default:
         return <p className="text-center text-gray-400">Content for {activeTab}</p>;
@@ -198,7 +198,7 @@ const TabComponent = ({ activeTab, onTabChange, tournament }) => {
       </svg>
       <button
         onClick={() => onTabChange(tab)}
-        className={`absolute inset-0 flex items-center justify-center text-lg md:text-lg px-2 
+        className={`absolute inset-0 flex items-center justify-center text-2xl md:text-lg px-2 
           ${activeTab === tab ? 'text-white' : 'text-white/55'}`}
       >
         <span className='font-free-fire tracking-widest'>{tab}</span>
@@ -235,9 +235,8 @@ const TabComponent = ({ activeTab, onTabChange, tournament }) => {
                   onTabChange(tab);
                   setIsDropdownOpen(false);
                 }}
-                className={`w-full p-2 text-left ${
-                  activeTab === tab ? 'bg-fe5821 text-white' : 'hover:bg-gray-700'
-                }`}
+                className={`w-full p-2 text-left ${activeTab === tab ? 'bg-fe5821 text-white' : 'hover:bg-gray-700'
+                  }`}
               >
                 {tab}
               </button>
@@ -264,18 +263,42 @@ const EsportsTournamentSidebar = () => {
   }, [slug]);
 
   const LoadingPage = () => (
-    <div className="fixed inset-0  flex flex-col justify-center items-center w-full h-full bg-[#05050f] z-50">
-      <div className="mb-6 md:mb-8 flex justify-center">
-        <div className="flex flex-col justify-center items-center">
-          <Image
-            src="https://moroccogamingexpo.ma/wp-content/uploads/2024/02/Logo-MGE-2025-white.svg"
-            alt="Brand Logo"
-            width={350}
-            height={100}
-            className="cut-corners"
-          />
-          <div className="animate-spin rounded-full h-24 w-24 border-t-2 border-b-2 border-purple-500 mt-8"></div>
+    <div className="fixed inset-0 flex flex-col justify-center items-center w-full h-full bg-secondary/95 backdrop-blur-sm z-50">
+      <div className="relative flex flex-col items-center">
+        {/* Animated background glow */}
+        <div className="absolute -inset-10 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
+        
+        {/* Logo container */}
+        <div className="relative mb-8 flex justify-center">
+          <div className="flex flex-col justify-center items-center">
+            <Image
+              src="https://moroccogamingexpo.ma/wp-content/uploads/2024/02/Logo-MGE-2025-white.svg"
+              alt="Brand Logo"
+              width={300}
+              height={80}
+              className="cut-corners drop-shadow-lg"
+            />
+            
+            {/* Tournament text */}
+            <div className="mt-4 text-white/80 font-valorant tracking-wider text-lg">
+              TOURNAMENT LOADING
+            </div>
+          </div>
         </div>
+        
+        {/* Custom animated loading indicator */}
+        <div className="relative flex items-center justify-center mt-6">
+          <div className="absolute w-16 h-16 border-4 border-primary/20 rounded-full"></div>
+          <div className="w-16 h-16 border-t-4 border-r-4 border-primary rounded-full animate-spin"></div>
+          
+          {/* Pulsing dot in center */}
+          <div className="absolute w-4 h-4 bg-primary rounded-full animate-pulse"></div>
+        </div>
+        
+        {/* Loading text */}
+        <p className="mt-6 text-white/60 font-pilot text-sm animate-pulse">
+          Preparing your tournament experience...
+        </p>
       </div>
     </div>
   );
@@ -380,34 +403,17 @@ const EsportsTournamentSidebar = () => {
   return (
     <>
       {isJoining && <LoadingPage />}
-      <div className="relative overflow-x-hidden flex flex-col lg:flex-row gap-8 bg-secondary text-white p-6  rounded-lg">
+      <div className="relative overflow-x-hidden flex flex-col lg:flex-row gap-8 bg-dark/70 angular-cut text-white p-9">
         <ToastContainer />
-
-        {/* Glow Effect */}
 
         {/* Tournament Content */}
         <div
-          className={`transition-all duration-300 ease-in-out ${
-            activeTab !== 'Overview'
-              ? 'lg:w-0 lg:opacity-0 lg:overflow-hidden'
-              : 'lg:w-1/3 lg:opacity-100'
-          }`}
+          className={`transition-all duration-300 ease-in-out lg:w-0 lg:opacity-0 lg:overflow-hidden`}
         >
- <div className=" text-primary">      
- <h3 className="font-custom text-primary leading-tight uppercase tracking-wider text-xl md:text-3xl mb-2 md:mb-4 flex items-center">
-                  <AlertCircle className="w-4 h-4 md:w-5 md:h-5 mr-2" />
-                  About the tournament
-                </h3>
-            <h3 className="font-pilot text-lg  my-4"></h3>
-            <p className="text-sm text-gray-400 ta">{tournament.description}</p>
-          </div>
-
           {/* {tournament.status !== 'Terminé' && <PrizeList />} */}
         </div>
         <div
-          className={`transition-all duration-300 ease-in-out ${
-            activeTab !== 'Overview' ? 'lg:w-full' : 'lg:w-2/3'
-          }`}
+          className={`transition-all duration-300 ease-in-out lg:w-full`}
         >
           <TabComponent activeTab={activeTab} onTabChange={setActiveTab} tournament={tournament} />
         </div>
