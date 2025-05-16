@@ -1,5 +1,5 @@
 'use client';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -31,6 +31,16 @@ export default function AuthForm() {
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [userData, setUserData] = useState(null);
   
+useEffect(() => {
+  // Check if user is already logged in
+  const sessionToken = localStorage.getItem('username');
+  if (sessionToken) {
+  // User is logged in, redirect to dashboard
+  router.push('/tournaments');
+  }
+
+}, []);
+
   const loginSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Required'),
     password: Yup.string().required('Required'),
