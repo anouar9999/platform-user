@@ -4,6 +4,7 @@ import { Search, SearchX } from 'lucide-react';
 import TournamentCard from '../../TournamentCard';
 import { ToastContainer } from 'react-toastify';
 import { IconTournament } from '@tabler/icons-react';
+import { useUser } from '../../../../contexts/UserContext';
 
 const ParticipantTournaments = ({ participantId }) => {
   const [filters, setFilters] = useState({
@@ -15,13 +16,14 @@ const ParticipantTournaments = ({ participantId }) => {
   const [filteredTournaments, setFilteredTournaments] = useState([]);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [userId, setUserId] = useState(null);
+  
+  // Use the UserContext instead of local state for userId
+  const { userData } = useUser();
 
   useEffect(() => {
-    // Access localStorage only after component mounts (client-side)
-    const user_id = localStorage.getItem("userId");
-    setUserId(user_id);
-    console.log("User ID:", user_id);
+    // Get userId from context instead of localStorage
+    const user_id = userData ;
+    console.log("User ID from context:", user_id);
     
     if (user_id) {
       setIsLoading(true);
@@ -49,7 +51,7 @@ const ParticipantTournaments = ({ participantId }) => {
           setIsLoading(false);
         });
     }
-  }, [participantId]);
+  }, [userData, participantId]); // Add userData as a dependency
 
   const filterOptions = {
     bracket_type: [
@@ -82,22 +84,25 @@ const ParticipantTournaments = ({ participantId }) => {
     <div className="bg-transparent text-white p-8 rounded-lg">
       <ToastContainer />
 
-      {/* <h3 className="text-5xl md:text-4xl lg:text-5xl tracking-wider mb-10 uppercase font-custom">
-        {' '}
-        YOUR TOURNAMENT JOURNEY <br/><span className='text-primary'> FROM CHALLENGER TO CHAMPION </span> 
-      </h3> */}
-<div className="my-8">
+      <div className="my-8">
         <div className="flex items-center text-primary">
           <IconTournament />
           <p className="mx-2 text-lg font-bold font-mono uppercase ">FROM CHALLENGER TO CHAMPION</p>
         </div>
 
         <h1 className="text-5xl flex items-center font-custom tracking-wider"> YOUR TOURNAMENT JOURNEY </h1>
+        
+        {userData && (
+          <div className="mt-4 text-gray-300">
+            <span>Welcome, <span className="text-primary font-semibold">{userData.username}</span></span>
+          </div>
+        )}
       </div>
+      
       {tournaments.length === 0 ? (
         <div className="text-center text-gray-400 mt-8">
           <SearchX className="mx-auto mb-4 w-16 h-16" />
-          <p>Vous n avez participé à aucun tournoi correspondant à votre recherche.</p>
+          <p>Vous n'avez participé à aucun tournoi correspondant à votre recherche.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2">

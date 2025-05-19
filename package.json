@@ -29,6 +29,7 @@
     "axios-mock-adapter": "^1.22.0",
     "chance": "^1.1.11",
     "chart.js": "^4.4.4",
+    "cross-storage": "^1.0.0",
     "date-fns": "^2.30.0",
     "emoji-picker-react": "^4.5.2",
     "formik": "^2.4.6",

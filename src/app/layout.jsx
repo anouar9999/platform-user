@@ -22,6 +22,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ToastProvider } from './components/toast/ToastProviderContext';
 import LoadingOverlay from './loading';
+import { UserProvider } from '@/contexts/UserContext';
 
 export const MyApp = ({ children }) => {
   const theme = ThemeSettings();
@@ -50,18 +51,20 @@ export default function RootLayout({ children }) {
   }, []);
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
-        <Provider store={store}>
-          <ToastProvider>
-            {loading ? (
-              // eslint-disable-next-line react/no-children-prop
+         <body>
+        <UserProvider>
+          <Provider store={store}>
+            <ToastProvider>
+              {loading ? (
+                // eslint-disable-next-line react/no-children-prop
 
-              <MyApp children={children} />
-            ) : (
-              <LoadingOverlay />
-            )}
-          </ToastProvider>
-        </Provider>
+                <MyApp children={children} />
+              ) : (
+                <LoadingOverlay />
+              )}
+            </ToastProvider>
+          </Provider>
+        </UserProvider>
       </body>
     </html>
   );
