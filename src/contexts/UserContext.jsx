@@ -23,43 +23,8 @@ function getCookie(name) {
   return null;
 }
 
-// Helper functions for localStorage
-const saveToLocalStorage = (key, value) => {
-  if (typeof window !== 'undefined') {
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-    } catch (error) {
-      console.error('Error saving to localStorage:', error);
-    }
-  }
-};
-
-const getFromLocalStorage = (key) => {
-  if (typeof window !== 'undefined') {
-    try {
-      const item = localStorage.getItem(key);
-      return item ? JSON.parse(item) : null;
-    } catch (error) {
-      console.error('Error getting from localStorage:', error);
-      return null;
-    }
-  }
-  return null;
-};
-
-const removeFromLocalStorage = (key) => {
-  if (typeof window !== 'undefined') {
-    try {
-      localStorage.removeItem(key);
-    } catch (error) {
-      console.error('Error removing from localStorage:', error);
-    }
-  }
-};
-
 // Provider component
 export const UserProvider = ({ children }) => {
-  // Initialize state from localStorage if available
   const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -71,33 +36,25 @@ export const UserProvider = ({ children }) => {
     setError(null);
     
     try {
-      // First check localStorage
-      let userDataResult = getFromLocalStorage('userData');
+      // First try to get from local AuthStorage
+      let userDataResult = await AuthStorage.getUserData();
       
-      // If not in localStorage, try AuthStorage
+      // If not found, force sync with cross-storage
       if (!userDataResult || !userDataResult.username) {
-        console.log('User data not found in localStorage, checking AuthStorage...');
-        userDataResult = await AuthStorage.getUserData();
-        
-        // If not found in AuthStorage, force sync with cross-storage
-        if (!userDataResult || !userDataResult.username) {
-          console.log('User data not found in AuthStorage, checking cross-storage...');
-          userDataResult = await AuthStorage.syncWithCrossStorage();
-        }
+        console.log('User data not found locally, checking cross-storage...');
+        userDataResult = await AuthStorage.syncWithCrossStorage();
       }
       
       // For backward compatibility, also check cookies
       const cookieToken = getCookie('userSessionToken');
       const cookieUsername = getCookie('username');
       const cookieAvatar = getCookie('avatarUrl');
-      const userId = localStorage.getItem('userId');
       
-      // Use values from localStorage/AuthStorage first, fall back to cookies
+      // Use values from AuthStorage first, fall back to cookies
       const username = userDataResult?.username || cookieUsername;
       const avatar = userDataResult?.avatarUrl || cookieAvatar;
       const type = userDataResult?.userType || '';
       const token = userDataResult?.token || cookieToken;
-      const id = userDataResult?.id || userId;
       
       if (!username || !token) {
         setUserData(null);
@@ -109,21 +66,12 @@ export const UserProvider = ({ children }) => {
           avatarUrl: avatar,
           userType: type,
           token,
-          id,
           ...userDataResult
         };
         
         setUserData(finalUserData);
         
-        // Save to localStorage for persistence
-        saveToLocalStorage('userData', finalUserData);
-        
-        // Also save userId separately for backward compatibility
-        if (id) {
-          localStorage.setItem('userId', id);
-        }
-        
-        // If we found data but not in cookies, update cookies
+        // If we found data in cross-storage but not in cookies, update cookies
         if (userDataResult && (!cookieUsername || !cookieToken)) {
           await AuthStorage.setUserData(finalUserData);
         }
@@ -142,13 +90,9 @@ export const UserProvider = ({ children }) => {
   // Function to sign out
   const signOut = async () => {
     try {
-      // Clear all auth data
+      // Clear all auth data using cross-storage
       await AuthStorage.clearUserData();
       setUserData(null);
-      
-      // Clear localStorage
-      removeFromLocalStorage('userData');
-      localStorage.removeItem('userId');
       
       // Force page reload with cache clearing parameters
       const noCache = `?nocache=${Date.now()}`;
@@ -188,21 +132,8 @@ export const UserProvider = ({ children }) => {
   const updateUserData = async (newData) => {
     try {
       const updatedData = { ...userData, ...newData };
-      
-      // Update in AuthStorage
       await AuthStorage.setUserData(updatedData);
-      
-      // Update in localStorage
-      saveToLocalStorage('userData', updatedData);
-      
-      // Update state
       setUserData(updatedData);
-      
-      // If ID is present, also update userId in localStorage
-      if (updatedData.id) {
-        localStorage.setItem('userId', updatedData.id);
-      }
-      
       return true;
     } catch (error) {
       console.error('Error updating user data:', error);
@@ -213,14 +144,6 @@ export const UserProvider = ({ children }) => {
 
   // Initial fetch on mount
   useEffect(() => {
-    // Try to load from localStorage first for immediate UI update
-    const cachedUserData = getFromLocalStorage('userData');
-    if (cachedUserData) {
-      setUserData(cachedUserData);
-      setIsLoading(false);
-    }
-    
-    // Then fetch fresh data
     fetchUserData();
   }, []);
 
