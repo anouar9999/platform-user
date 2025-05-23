@@ -72,8 +72,8 @@ export default function AuthForm() {
   const getValidationSchema = () => {
     switch(signupStep) {
       case 1: return signupSchema1; // email
-      case 2: return signupSchema3; // username  
-      case 3: return signupSchema2; // password
+    case 2: return signupSchema3; // username  ⚠️ Should this be signupSchema2?
+    case 3: return signupSchema2;
       case 4: return Yup.object().shape({
         termsAccepted: Yup.boolean().oneOf([true], 'You must accept the terms and conditions')
       }); // ✅ Add validation for step 4
@@ -180,23 +180,46 @@ export default function AuthForm() {
         setUserData({
           username: data.username,
           avatarUrl: data.avatar,
-          userId: data.user_id
+          userId: data.user_id,
+          sessionToken: data.session_token
         });
+// Store in localStorage for cross-tab access
+const userData2 = {
+  username: data.username,
+  avatarUrl: data.avatar,
+  userId: data.user_id,
+  userType: data.user_type,
+  sessionToken: data.session_token
+};
 
-        // Store user session data in localStorage
-        localStorage.setItem('userSessionToken', data.session_token);
-        localStorage.setItem('userId', data.user_id);
-        localStorage.setItem('username', data.username);
-        localStorage.setItem('userType', data.user_type);
-        localStorage.setItem('avatarUrl', data.avatar);
-
+        localStorage.setItem('authData', JSON.stringify({
+          sessionToken: data.session_token,
+          userId: data.user_id,
+          username: data.username,
+          userType: data.user_type,
+          avatarUrl: data.avatar,
+          timestamp: new Date().getTime()
+        }));
+        console.log('User data stored in state:', userData2);
+        const channel = new BroadcastChannel('auth_channel');
+        channel.postMessage({
+          type: 'login',
+          data: userData2
+        });
+        channel.close();
+        if (window.opener) {
+          window.opener.postMessage({
+            type: 'auth_success',
+            data: userData2
+          }, 'http://localhost:5173'); // Your React app URL
+        }
         setServerMessage({
           type: 'success',
           message: `Welcome back, ${data.username}! Redirecting to dashboard...`,
         });
 
         setTimeout(() => {
-          router.push('/tournaments');
+          window.location.href = 'http://localhost:3000/choose-to';  // Go to React app
         }, 1500);
       } else {
         // Registration request handling
@@ -541,7 +564,7 @@ export default function AuthForm() {
       {/* Inject animated gradient CSS */}
       <style dangerouslySetInnerHTML={{ __html: animatedGradientStyle }} />
       {/* Welcome animation overlay */}
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {welcomeAnimation && (
           <motion.div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black"
@@ -559,7 +582,7 @@ export default function AuthForm() {
             </div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
 
       {/* Main background with improved blur effect */}
 
@@ -599,7 +622,7 @@ export default function AuthForm() {
             >
 
               <div className="text-center z-50">
-                <h1 className="text-5xl font-black  uppercase tracking-wider font-free-fire text-white mb-4">Créer un compte</h1>
+                <h1 className="text-5xl font-black  uppercase tracking-wider font-free-fire  mb-4 text-orange-mge  ">Créer un compte</h1>
               </div>
               <div
                 className={`absolute inset-0 bg-gradient-to-b z-10 from-secondary/20 to-secondary `}
@@ -802,39 +825,7 @@ export default function AuthForm() {
                             </button>
                           </motion.div>
 
-                          {/* Second Row of Social Buttons */}
-                          {/* <motion.div variants={formItemVariants} className="grid grid-cols-4 gap-3 mb-6">
-                    
-                            <button
-                              type="button"
-                              className="flex items-center justify-center p-2 bg-white hover:bg-gray-100 transition-colors rounded"
-                            >
-                              <img src="/riot.svg" alt="Riot" className="w-6 h-6" />
-                            </button>
-
-                            <button
-                              type="button"
-                              className="flex items-center justify-center p-2 bg-white hover:bg-gray-100 transition-colors rounded"
-                            >
-                              <img src="/twitch.svg" alt="Twitch" className="w-6 h-6" />
-                            </button>
-
-                         
-                            <button
-                              type="button"
-                              className="flex items-center justify-center p-2 bg-white hover:bg-gray-100 transition-colors rounded"
-                            >
-                              <img src="/tiktok.svg" alt="TikTok" className="w-6 h-6" />
-                            </button>
-
-                       
-                            <button
-                              type="button"
-                              className="flex items-center justify-center p-2 bg-white hover:bg-gray-100 transition-colors rounded"
-                            >
-                              <img src="/pubg.svg" alt="PUBG" className="w-6 h-6" />
-                            </button>
-                          </motion.div> */}
+                        
 
 
                           {/* No account? Sign up link */}
@@ -848,7 +839,7 @@ export default function AuthForm() {
                             <button
                               type="button"
                               onClick={() => changeTab('signup')}
-                              className="text-white hover:text-gray-300 uppercase font-bold transition-colors text-sm"
+                              className="text-orange-mge hover:underline uppercase font-bold transition-colors text-sm"
                             >
                               CRÉER UN COMPTE
                             </button>
@@ -874,11 +865,6 @@ export default function AuthForm() {
               {/* Sign Up Form with enhanced UX - New Multi-step Form */}
               {activeTab === 'signup' && (
                 <div>
-
-
-
-
-
                   <motion.div
                     key="signup-form"
                     custom={direction}
@@ -1171,30 +1157,10 @@ export default function AuthForm() {
                                         } text-white py-3.5 px-4 rounded-xl font-medium
     transition-all duration-300 shadow-lg
     flex items-center justify-center relative overflow-hidden group`}
-                                      whileHover={{
-                                        scale: !errors.username &&
-
-                                          values.username
-                                      }}
-                                      whileTap={{
-                                        scale: !errors.username &&
-                                          values.username
-
-                                      }}
+                          
+                                    
                                     >
-                                      {/* Animated background effect for enabled button */}
-                                      {!errors.username &&
-
-                                        values.username &&
-
-                                        (
-                                          <motion.div
-                                            className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-amber-400/20 opacity-0 group-hover:opacity-100 transition-opacity"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: [0, 0.5, 0] }}
-                                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                                          />
-                                        )}
+                                   
                                       <span>Continue</span>
                                       <ArrowRightIcon className="ml-2 h-5 w-5" />
                                     </motion.button>
