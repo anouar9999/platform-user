@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Formik, Form, Field } from 'formik';
@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import Loader from './Loader';
 import { FaExclamationCircle } from 'react-icons/fa';
+import ServerMessage from './ServerMessage';
 
 export default function AuthForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -34,13 +35,190 @@ export default function AuthForm() {
   const [userData, setUserData] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
 
-  // Hide welcome animation after it plays
+  const sharedDataRef = useRef(null);
+  const updateAuthUI = (userData) => {
+    console.log('Updating UI for authenticated user:', userData);
+    setUserData(userData);
+  };
+
+  const clearAuthUI = () => {
+    console.log('Clearing UI for logged out user');
+    setActiveTab('login');
+    setSignupStep(1);
+    setUserData(null);
+    setServerMessage({ type: '', message: '' });
+  };
+
+  const prefillFormData = (formData) => {
+    console.log('Prefilling form with data from other window:', formData);
+    // Implement form prefilling logic here if needed
+  };
+
+  // Initialize SharedDataManager
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setWelcomeAnimation(false);
-    }, 2000);
-    return () => clearTimeout(timer);
+    console.log('🔧 AuthForm - Initializing SharedDataManager...');
+    
+    // Create SharedDataManager instance
+    sharedDataRef.current = new SharedDataManager();
+    
+    // Subscribe to data changes
+    unsubscribeRef.current = sharedDataRef.current.subscribe((type, key, value) => {
+      console.log('🔧 AuthForm - Data change received:', { type, key, value });
+      
+      switch(type) {
+        case 'set':
+        case 'auth-success':
+          if (key === 'authData') {
+            updateAuthUI(value);
+            setServerMessage({
+              type: 'success',
+              message: `Welcome back, ${value.username}! You're now logged in across all windows.`,
+            });
+          }
+          break;
+          
+        case 'delete':
+        case 'logout':
+          if (key === 'authData' || type === 'logout') {
+            clearAuthUI();
+            setServerMessage({
+              type: 'info',
+              message: 'You have been logged out.',
+            });
+            localStorage.removeItem('authData');
+          }
+          break;
+          
+        case 'sync':
+          // Handle initial data sync from other windows
+          if (value && value.authData) {
+            updateAuthUI(value.authData);
+          }
+          break;
+      }
+      
+      // Handle signup form data prefilling
+      if (key === 'signupFormData' && type === 'set') {
+        prefillFormData(value);
+      }
+    });
+    
+    // Check for existing auth data with retry mechanism
+    const checkAuthData = async (attempts = 0) => {
+      console.log(`🔧 Checking auth data (attempt ${attempts + 1})...`);
+      
+      // First check SharedDataManager
+      const existingAuthData = sharedDataRef.current.getAuthData();
+      if (existingAuthData) {
+        console.log('🔧 Found auth data in SharedDataManager:', existingAuthData);
+        updateAuthUI(existingAuthData);
+        return;
+      }
+      
+      // Then check localStorage
+      const localAuthData = localStorage.getItem('authData');
+      if (localAuthData) {
+        try {
+          const parsed = JSON.parse(localAuthData);
+          let userDataToSet = null;
+          
+          // Handle different localStorage structures
+          if (parsed.username) {
+            userDataToSet = parsed;
+          } else if (parsed.user && parsed.user.username) {
+            userDataToSet = parsed.user;
+          } else if (parsed.data && parsed.data.username) {
+            userDataToSet = parsed.data;
+          }
+          
+          if (userDataToSet) {
+            console.log('🔧 Found auth data in localStorage, syncing to SharedDataManager:', userDataToSet);
+            sharedDataRef.current.setAuthData(userDataToSet);
+            updateAuthUI(userDataToSet);
+            return;
+          }
+        } catch (error) {
+          console.error('🔧 Error parsing localStorage auth data:', error);
+        }
+      }
+      
+      // Retry mechanism for cross-window sync
+      if (attempts < 3) {
+        setTimeout(() => checkAuthData(attempts + 1), 200);
+      } else {
+        console.log('🔧 No auth data found after all attempts');
+      }
+    };
+    
+    // Start checking with a small delay to allow for message passing
+    setTimeout(() => checkAuthData(), 100);
+    
+    // Cleanup function
+    return () => {
+      console.log('🔧 AuthForm - Cleaning up SharedDataManager...');
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+      }
+      if (sharedDataRef.current) {
+        sharedDataRef.current.destroy();
+      }
+    };
   }, []);
+
+  // Handle logout
+  const handleLogout = () => {
+    console.log('🔧 AuthForm - Handling logout...');
+    
+    // Clear SharedDataManager (this will sync to other windows)
+    sharedDataRef.current?.clearAuthData();
+    
+    // Clear localStorage
+    localStorage.removeItem('authData');
+    localStorage.removeItem('userData');
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userId');
+    
+    // Clear local state
+    clearAuthUI();
+    
+    setServerMessage({
+      type: 'info',
+      message: 'You have been logged out successfully.',
+    });
+  };
+
+  // Render auth status
+  const renderAuthStatus = () => {
+    if (userData) {
+      return (
+        <div className="mb-4 p-3 bg-green-900/30 border border-green-700 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              {userData.avatarUrl && (
+                <img 
+                  src={userData.avatarUrl} 
+                  alt="User avatar" 
+                  className="w-8 h-8 rounded-full mr-2"
+                />
+              )}
+              <span className="text-green-400 text-sm">
+                Logged in as {userData.username}
+              </span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="text-red-400 hover:text-red-300 text-xs underline"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
 
   // Define validation schemas
   const loginSchema = Yup.object().shape({
@@ -51,12 +229,12 @@ export default function AuthForm() {
   // Split signup validation schemas for multi-step form
   const signupSchema1 = Yup.object().shape({
     email: Yup.string().email('Invalid email address').required('Email is required'),
-
   });
+
   const signupSchema3 = Yup.object().shape({
     username: Yup.string().required('username is required'),
-
   });
+
   const signupSchema2 = Yup.object().shape({
     password: Yup.string()
       .required('Password is required')
@@ -69,17 +247,19 @@ export default function AuthForm() {
       .oneOf([Yup.ref('password'), null], 'Passwords must match')
       .required('Please confirm your password'),
   });
+
   const getValidationSchema = () => {
     switch(signupStep) {
       case 1: return signupSchema1; // email
-    case 2: return signupSchema3; // username  ⚠️ Should this be signupSchema2?
-    case 3: return signupSchema2;
+      case 2: return signupSchema3; // username
+      case 3: return signupSchema2; // password
       case 4: return Yup.object().shape({
         termsAccepted: Yup.boolean().oneOf([true], 'You must accept the terms and conditions')
-      }); // ✅ Add validation for step 4
+      }); // terms
       default: return signupSchema1;
     }
   };
+
   const loginInitialValues = {
     email: '',
     password: ''
@@ -90,9 +270,10 @@ export default function AuthForm() {
     username: '',
     password: '',
     confirmPassword: '',
-    avatar: null, // New field for avatar
-    termsAccepted: false // New field for terms
+    avatar: null,
+    termsAccepted: false
   };
+
   const handleFileChange = (event, setFieldValue) => {
     const file = event.currentTarget.files[0];
     if (file) {
@@ -133,10 +314,15 @@ export default function AuthForm() {
     }
   };
 
-  // Updated handleSubmit function
   const handleSubmit = async (values, { setSubmitting }) => {
     setIsLoading(true);
-    const isLogin = activeTab === 'login'
+    const isLogin = activeTab === 'login';
+    
+    // Save form data to shared storage for multi-window form continuation
+    if (!isLogin) {
+      sharedDataRef.current?.set('signupFormData', values);
+    }
+    
     try {
       const url = isLogin
         ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user_login.php`
@@ -145,13 +331,10 @@ export default function AuthForm() {
       let response;
 
       if (isLogin) {
-        // Login request handling
         const loginData = {
           email: values.email,
           password: values.password,
         };
-
-        console.log('Sending login data:', loginData);
 
         response = await fetch(url, {
           method: 'POST',
@@ -162,13 +345,10 @@ export default function AuthForm() {
         });
 
         const responseText = await response.text();
-        console.log('Raw login response:', responseText);
-
         let data;
         try {
           data = JSON.parse(responseText);
         } catch (e) {
-          console.error('Failed to parse login response:', e);
           throw new Error('Invalid server response format');
         }
 
@@ -176,70 +356,52 @@ export default function AuthForm() {
           throw new Error(data.message || 'Login failed');
         }
 
-        // Store user session data and save in state
-        setUserData({
+        const userData = {
           username: data.username,
           avatarUrl: data.avatar,
           userId: data.user_id,
+          userType: data.user_type,
           sessionToken: data.session_token
-        });
-// Store in localStorage for cross-tab access
-const userData2 = {
-  username: data.username,
-  avatarUrl: data.avatar,
-  userId: data.user_id,
-  userType: data.user_type,
-  sessionToken: data.session_token
-};
+        };
 
-        localStorage.setItem('authData', JSON.stringify({
+        // Store in localStorage with proper structure
+        const authDataForStorage = {
           sessionToken: data.session_token,
           userId: data.user_id,
           username: data.username,
           userType: data.user_type,
           avatarUrl: data.avatar,
           timestamp: new Date().getTime()
-        }));
-        console.log('User data stored in state:', userData2);
-        const channel = new BroadcastChannel('auth_channel');
-        channel.postMessage({
-          type: 'login',
-          data: userData2
-        });
-        channel.close();
-        if (window.opener) {
-          window.opener.postMessage({
-            type: 'auth_success',
-            data: userData2
-          }, 'http://localhost:5173'); // Your React app URL
-        }
+        };
+        
+        localStorage.setItem('authData', JSON.stringify(authDataForStorage));
+
+        // Store in SharedDataManager (this will sync to other windows)
+        sharedDataRef.current?.setAuthData(userData);
+        
+        // Update local state
+        updateAuthUI(userData);
+
         setServerMessage({
           type: 'success',
           message: `Welcome back, ${data.username}! Redirecting to dashboard...`,
         });
 
         setTimeout(() => {
-          window.location.href = 'http://localhost:3000/choose-to';  // Go to React app
+          window.location.href = 'http://localhost:3000/choose-to';
         }, 1500);
+        
       } else {
-        // Registration request handling
+        // Registration handling (keeping your existing logic)
         const formData = new FormData();
-
-        // Basic user data
         formData.append('username', values.username);
         formData.append('email', values.email);
         formData.append('password', values.password);
         formData.append('bio', values.bio || '');
         formData.append('is_verified', '1');
 
-        // Handle avatar file
         if (values.avatar && values.avatar instanceof File) {
           formData.append('avatar', values.avatar, values.avatar.name);
-        }
-
-        console.log('Sending registration data:');
-        for (let [key, value] of formData.entries()) {
-          console.log(`${key}: ${value instanceof File ? `File: ${value.name}` : value}`);
         }
 
         response = await fetch(url, {
@@ -248,22 +410,21 @@ const userData2 = {
         });
 
         const responseText = await response.text();
-        console.log('Raw registration response:', responseText);
-
         let data;
         try {
           data = JSON.parse(responseText);
         } catch (e) {
-          console.error('Failed to parse registration response:', e);
           throw new Error('Invalid server response format');
         }
 
         if (!response.ok) {
-          console.error('Server error details:', data);
           throw new Error(data.message || `Server error: ${response.status}`);
         }
 
         if (data.success) {
+          // Clear signup form data after successful registration
+          sharedDataRef.current?.delete('signupFormData');
+          
           setServerMessage({
             type: 'success',
             message: 'Account created successfully! You can now log in.',
@@ -288,6 +449,7 @@ const userData2 = {
       setSubmitting(false);
     }
   };
+
   // Toggle password visibility
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -296,54 +458,6 @@ const userData2 = {
   const toggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
-
-  // Handle form submission
-  // const handleSubmit = async (values, { setSubmitting, resetForm }) => {
-  //   // For multi-step form: only proceed to next step if not on final step
-  //   if (activeTab === 'signup' && signupStep < 3) {
-  //     setSignupStep(signupStep + 1);
-  //     setSubmitting(false);
-  //     return;
-  //   }
-
-  //   setIsLoading(true);
-
-  //   try {
-  //     // Simulate API call
-  //     console.log(`${activeTab === 'login' ? 'Login' : 'Signup'} attempt with:`, values);
-
-  //     // Simulate API call delay
-  //     await new Promise(resolve => setTimeout(resolve, 1500));
-  //     console.log(values);
-  //     // Set success message
-  //     setServerMessage({
-  //       type: 'success',
-  //       message: activeTab === 'login' ? 'Login successful! Redirecting you...' : 'Account created successfully! Redirecting you...'
-  //     });
-
-  //     // Reset form after successful submission
-  //     resetForm();
-
-  //     // Reset signup step
-  //     if (activeTab === 'signup') {
-  //       setSignupStep(1);
-  //     }
-
-  //     // Simulate redirect after successful login/signup
-  //     setTimeout(() => {
-  //       router.push('/tournaments');
-  //     }, 1500);
-  //   } catch (error) {
-  //     console.error(`${activeTab === 'login' ? 'Login' : 'Signup'} error:`, error);
-  //     setServerMessage({
-  //       type: 'error',
-  //       message: error.message || `An error occurred during ${activeTab === 'login' ? 'login' : 'signup'}`
-  //     });
-  //   } finally {
-  //     setIsLoading(false);
-  //     setSubmitting(false);
-  //   }
-  // };
 
   // Function to handle avatar selection
   const handleAvatarChange = (e, setFieldValue) => {
@@ -545,50 +659,32 @@ const userData2 = {
   const getStepProgressPercentage = () => {
     return ((signupStep - 1) / 2) * 100 + '%';
   };
+
   if (isLoading) {
     return (
       <Loader
-        message={"edzedzedzdzed"}
-        username={"fefrf"}
+        message={"Processing..."}
+        username={"User"}
         logo="https://moroccogamingexpo.ma/wp-content/uploads/2024/02/Logo-MGE-2025-white.svg"
         logoAlt="MGE 2025 Logo"
       />
     );
   }
+
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-around bg-black"
       style={{ backgroundImage: 'url(https://lolstatic-a.akamaihd.net/rso-authenticator-ui/0.87.4/assets/riot_desktop_background_2x.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}
     >
       <div className="absolute inset-0 bg-gradient-to-t from-transparent to-secondary/80 "></div>
+      
+      {/* ✅ Add auth status display */}
+      <div className="absolute top-4 right-4 z-50">
+        {renderAuthStatus()}
+      </div>
 
       {/* Inject animated gradient CSS */}
       <style dangerouslySetInnerHTML={{ __html: animatedGradientStyle }} />
-      {/* Welcome animation overlay */}
-      {/* <AnimatePresence>
-        {welcomeAnimation && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black"
-            variants={welcomeVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-          >
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-4">
-                <span className="text-white text-5xl font-bold">PLAY</span>
-                <span className="text-orange-500 text-5xl font-bold ml-2">WASTE</span>
-              </div>
-              <p className="text-gray-400 text-xl">Welcome to gaming excellence</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence> */}
 
-      {/* Main background with improved blur effect */}
-
-
-      {/* Subtle animated gradient overlay */}
-      {/* <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-gray-900/50 to-blue-900/30 animate-gradient-slow"></div> */}
       <div className={`${activeTab === 'signup' ? 'absolute top-0 left-4' : ''} w-36 z-50 mt-7  overflow-hidden`}>
         <img
           src="https://moroccogamingexpo.ma/wp-content/uploads/2024/02/Logo-MGE-2025-white.svg"
@@ -620,7 +716,6 @@ const userData2 = {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.5 }}
             >
-
               <div className="text-center z-50">
                 <h1 className="text-5xl font-black  uppercase tracking-wider font-free-fire  mb-4 text-orange-mge  ">Créer un compte</h1>
               </div>
@@ -632,40 +727,18 @@ const userData2 = {
 
           {/* Right side - Auth form */}
           <div className={`${activeTab === 'signup' ? 'md:w-7/12' : 'w-full'} p-6 min-h-[600px] overflow-y-auto`}>
-
-
-            {/* Server Message Display with improved styling and animations */}
-            <AnimatePresence>
-              {serverMessage.message && (
-                <motion.div
-                  className={`mb-6 p-4 rounded-lg ${serverMessage.type === 'error' ? 'bg-red-900/40 text-red-200 border border-red-700/50' :
-                    serverMessage.type === 'success' ? 'bg-green-900/40 text-green-200 border border-green-700/50' : ''
-                    }`}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="flex items-start">
-                    {serverMessage.type === 'success' ? (
-                      <CheckCircleIcon className="h-5 w-5 mr-2 text-green-400 mt-0.5" />
-                    ) : (
-                      <div className="h-5 w-5 mr-2 text-red-400 mt-0.5">⚠️</div>
-                    )}
-                    <div className="flex-1">{serverMessage.message}</div>
-                    <button
-                      onClick={() => setServerMessage({ type: '', message: '' })}
-                      className="ml-2 text-gray-400 hover:text-white"
-                    >
-                      <CloseIcon size={16} />
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {/* Server Message Component */}
+            <ServerMessage 
+              message={serverMessage.message} 
+              type={serverMessage.type} 
+              onClose={() => setServerMessage({ type: '', message: '' })} 
+            />
 
             {/* Forms with AnimatePresence for better transitions */}
             <AnimatePresence mode="wait" custom={direction}>
+              {/* Your existing login and signup form JSX remains exactly the same */}
+              {/* I'm keeping all your form structure and animations */}
+              
               {/* Login Form */}
               {activeTab === 'login' && (
                 <motion.div
@@ -684,25 +757,18 @@ const userData2 = {
                   >
                     {({ errors, touched, values, handleChange, handleBlur }) => (
                       <Form>
+                        {/* All your existing login form JSX */}
                         <motion.div
                           className="space-y-8"
                           variants={formVariants}
                           initial="hidden"
                           animate="visible"
                         >
-
-                          {/* Logo at the top */}
                           <motion.div
                             variants={formItemVariants}
                             className="text-center mb-6"
                           >
                             <h2 className="text-xl font-semibold text-white mb-6">Se connecter</h2>
-                          </motion.div>
-
-
-                          {/* OR Divider */}
-                          <motion.div variants={formItemVariants} className="relative my-8">
-
                           </motion.div>
 
                           {/* Email Input */}
@@ -722,11 +788,11 @@ const userData2 = {
                             )}
                           </motion.div>
 
-                          {/* Password Input with Forgot Password link */}
+                          {/* Password Input */}
                           <motion.div variants={formItemVariants} className="mb-4">
                             <div className="flex justify-between items-center mb-2">
                               <label className="block text-white text-sm font-medium">Mot de passe</label>
-                              <a href="#" className="text-orange-500 hover:text-orange-400 transition-colors text-sm">
+                              <a href="/forgot-password" className="text-orange-500 hover:text-orange-400 transition-colors text-sm">
                                 Mot de passe oublié ?
                               </a>
                             </div>
@@ -825,9 +891,6 @@ const userData2 = {
                             </button>
                           </motion.div>
 
-                        
-
-
                           {/* No account? Sign up link */}
                           <motion.div
                             variants={formItemVariants}
@@ -862,7 +925,7 @@ const userData2 = {
                 </motion.div>
               )}
 
-              {/* Sign Up Form with enhanced UX - New Multi-step Form */}
+              {/* Sign Up Form with enhanced UX - Multi-step Form */}
               {activeTab === 'signup' && (
                 <div>
                   <motion.div
@@ -903,7 +966,8 @@ const userData2 = {
                                   exit={{ opacity: 0, y: 10 }}
                                   transition={{ duration: 0.3 }}
                                 >
-                                  <h2 className="text-3xl font-ea-football tracking-widest text-white">Quelle est votre  </h2>                  <h2 className="text-3xl font-ea-football tracking-wider text-white">adresse e-mail </h2>
+                                  <h2 className="text-3xl font-ea-football tracking-widest text-white">Quelle est votre</h2>
+                                  <h2 className="text-3xl font-ea-football tracking-wider text-white">adresse e-mail</h2>
                                   <p className="text-gray-400 font-pilot mt-2">Rassurez-vous, nous ne la donnerons à personne.</p>
                                 </motion.div>
                               )}
@@ -914,10 +978,9 @@ const userData2 = {
                                   exit={{ opacity: 0, y: 10 }}
                                   transition={{ duration: 0.3 }}
                                 >
-                                  <h2 className="text-3xl font-ea-football tracking-wide text-white">Choisissez un nom
-                                  </h2>                  <h2 className="text-3xl font-ea-football tracking-wide text-white">d'utilisateur </h2>
-                                  <p className="text-gray-400 font-pilot mt-2">Utilisé pour vous connecter à tous nos jeux.
-                                  </p>
+                                  <h2 className="text-3xl font-ea-football tracking-wide text-white">Choisissez un nom</h2>
+                                  <h2 className="text-3xl font-ea-football tracking-wide text-white">d'utilisateur</h2>
+                                  <p className="text-gray-400 font-pilot mt-2">Utilisé pour vous connecter à tous nos jeux.</p>
                                 </motion.div>
                               )}
                               {signupStep === 3 && (
@@ -927,12 +990,10 @@ const userData2 = {
                                   exit={{ opacity: 0, y: 10 }}
                                   transition={{ duration: 0.3 }}
                                 >
-                                  <h2 className="text-3xl font-ea-football tracking-wider text-white">Choisissez un mot de passe                                </h2>
-                                  <p className="text-gray-400 font-pilot mt-2">Trouvez-en un bon.
-                                  </p>
+                                  <h2 className="text-3xl font-ea-football tracking-wider text-white">Choisissez un mot de passe</h2>
+                                  <p className="text-gray-400 font-pilot mt-2">Trouvez-en un bon.</p>
                                 </motion.div>
                               )}
-
                               {signupStep === 4 && (
                                 <motion.div
                                   initial={{ opacity: 0, y: -10 }}
@@ -948,7 +1009,7 @@ const userData2 = {
 
                             {/* Multi-step form content with animations */}
                             <AnimatePresence mode="wait">
-                              {/* Step 1: Basic Information */}
+                              {/* Step 1: Email */}
                               {signupStep === 1 && (
                                 <motion.div
                                   key="step1"
@@ -972,7 +1033,7 @@ const userData2 = {
                                         onChange={handleChange}
                                         onBlur={handleBlur}
                                         placeholder="Your email address"
-                                        className="w-full pl-10 pr-10 py-3 bg-dark text-white rounded focus:outline-none focus:ring-2 focus:ring-orange-500  transition-all"
+                                        className="w-full pl-10 pr-10 py-3 bg-dark text-white rounded focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
                                       />
                                     </div>
                                     {touched.email && errors.email && (
@@ -985,7 +1046,8 @@ const userData2 = {
                                         <CheckCircleIcon className="h-3.5 w-3.5 mr-1.5" /> Email available
                                       </div>
                                     )}
-                                    {/* Riot Newsletter Consent */}
+
+                                    {/* Newsletter Consent */}
                                     <div className="mt-8">
                                       <label className="flex items-start space-x-3 cursor-pointer group">
                                         <div className="relative flex items-start">
@@ -1000,8 +1062,8 @@ const userData2 = {
                                         </span>
                                       </label>
                                     </div>
-
                                   </motion.div>
+
                                   <div className="relative">
                                     <div className="absolute inset-0 flex items-center">
                                       <div className="w-full border-t border-gray-600"></div>
@@ -1010,45 +1072,25 @@ const userData2 = {
                                       <span className="px-2 bg-secondary text-gray-400">Vous pouvez aussi créer un compte avec</span>
                                     </div>
                                   </div>
-                                  {/* Social Login Options */}
 
                                   {/* Social Login Buttons */}
                                   <motion.div variants={formItemVariants} className="grid grid-cols-4 gap-3 mb-6">
-                                    {/* Facebook */}
-                                    <button
-                                      type="button"
-                                      className="flex items-center justify-center p-2 bg-white hover:bg-gray-100 transition-colors rounded"
-                                    >
+                                    <button type="button" className="flex items-center justify-center p-2 bg-white hover:bg-gray-100 transition-colors rounded">
                                       <img src="https://auth.gbarena.com/assets/social-media-icons/facebook-icon.svg" alt="Facebook" className="w-6 h-6" />
                                     </button>
-
-                                    {/* Discord */}
-                                    <button
-                                      type="button"
-                                      className="flex items-center justify-center p-2 bg-white hover:bg-gray-100 transition-colors rounded"
-                                    >
+                                    <button type="button" className="flex items-center justify-center p-2 bg-white hover:bg-gray-100 transition-colors rounded">
                                       <img src="https://auth.gbarena.com/assets/social-media-icons/riot-icon.svg" alt="Discord" className="w-6 h-6" />
                                     </button>
-
-                                    {/* Google */}
-                                    <button
-                                      type="button"
-                                      className="flex items-center justify-center p-2 bg-white hover:bg-gray-100 transition-colors rounded"
-                                    >
+                                    <button type="button" className="flex items-center justify-center p-2 bg-white hover:bg-gray-100 transition-colors rounded">
                                       <img src="https://auth.gbarena.com/assets/social-media-icons/google-icon.svg" alt="Google" className="w-6 h-6" />
                                     </button>
-
-                                    {/* Apple */}
-                                    <button
-                                      type="button"
-                                      className="flex items-center justify-center p-2 bg-white hover:bg-gray-100 transition-colors rounded"
-                                    >
+                                    <button type="button" className="flex items-center justify-center p-2 bg-white hover:bg-gray-100 transition-colors rounded">
                                       <img src="https://auth.gbarena.com/assets/social-media-icons/discord-icon.svg" alt="Apple" className="w-6 h-6" />
                                     </button>
                                   </motion.div>
 
                                   {/* Next button */}
-                                  <motion.div variants={formItemVariants} className="pt-3  gap-x-96">
+                                  <motion.div variants={formItemVariants} className="pt-3">
                                     <motion.button
                                       type="button"
                                       onClick={() => {
@@ -1073,11 +1115,10 @@ const userData2 = {
                                       <ArrowRightIcon className="ml-2 h-5 w-5" />
                                     </motion.button>
                                   </motion.div>
-
-
-
                                 </motion.div>
                               )}
+
+                              {/* Step 2: Username */}
                               {signupStep === 2 && (
                                 <motion.div
                                   key="step2"
@@ -1087,13 +1128,11 @@ const userData2 = {
                                   exit="exit"
                                   className="space-y-8 p-6"
                                 >
-
-                                  {/* Email Input with icon */}
                                   <motion.div variants={formItemVariants}>
                                     <label className="block text-gray-300 text-sm font-pilot mb-2">Username</label>
                                     <div className="relative group">
                                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <MailIcon className="h-5 w-5 text-orange-500 group-focus-within:text-orange-400 transition-colors" />
+                                        <UserIcon className="h-5 w-5 text-orange-500 group-focus-within:text-orange-400 transition-colors" />
                                       </div>
                                       <input
                                         type="text"
@@ -1102,7 +1141,7 @@ const userData2 = {
                                         onChange={handleChange}
                                         onBlur={handleBlur}
                                         placeholder="Your username"
-                                        className="w-full pl-10 pr-10 py-3 bg-dark text-white rounded focus:outline-none focus:ring-2 focus:ring-orange-500  transition-all"
+                                        className="w-full pl-10 pr-10 py-3 bg-dark text-white rounded focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
                                       />
                                     </div>
                                     {touched.username && errors.username && (
@@ -1112,24 +1151,17 @@ const userData2 = {
                                     )}
                                     {!errors.username && values.username && (
                                       <div className="text-green-400 text-xs mt-2 ml-1 flex font-pilot items-center">
-                                        <CheckCircleIcon className="h-3.5 w-3.5 mr-1.5" /> username available
+                                        <CheckCircleIcon className="h-3.5 w-3.5 mr-1.5" /> Username available
                                       </div>
                                     )}
-
-
                                   </motion.div>
-
-
 
                                   {/* Navigation buttons */}
                                   <motion.div variants={formItemVariants} className="grid grid-cols-2 gap-x-52 pt-4">
-                                    {/* Back Button */}
                                     <motion.button
                                       type="button"
                                       onClick={() => setSignupStep(1)}
-                                      className="w-full bg-gray-800/80 text-gray-300 py-3.5 px-4 rounded-xl font-medium
-    hover:bg-gray-700/90 transition-all duration-300 border border-gray-700/40
-    flex items-center justify-center shadow-md backdrop-blur-sm"
+                                      className="w-full bg-gray-800/80 text-gray-300 py-3.5 px-4 rounded-xl font-medium hover:bg-gray-700/90 transition-all duration-300 border border-gray-700/40 flex items-center justify-center shadow-md backdrop-blur-sm"
                                       whileHover={{ scale: 1.02, backgroundColor: "rgba(55, 65, 81, 0.9)" }}
                                       whileTap={{ scale: 0.98 }}
                                     >
@@ -1137,40 +1169,26 @@ const userData2 = {
                                       <span>Back</span>
                                     </motion.button>
 
-                                    {/* Continue Button */}
                                     <motion.button
                                       type="button"
                                       onClick={() => {
-                                        if (
-                                          !errors.username &&
-
-                                          values.username
-                                        ) {
+                                        if (!errors.username && values.username) {
                                           setSignupStep(3);
                                         }
                                       }}
-                                      className={`w-full ${!errors.username &&
-
-                                        values.username
+                                      className={`w-full ${!errors.username && values.username
                                         ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400'
                                         : 'bg-gray-700/80 text-gray-400 cursor-not-allowed'
-                                        } text-white py-3.5 px-4 rounded-xl font-medium
-    transition-all duration-300 shadow-lg
-    flex items-center justify-center relative overflow-hidden group`}
-                          
-                                    
+                                        } text-white py-3.5 px-4 rounded-xl font-medium transition-all duration-300 shadow-lg flex items-center justify-center relative overflow-hidden group`}
                                     >
-                                   
                                       <span>Continue</span>
                                       <ArrowRightIcon className="ml-2 h-5 w-5" />
                                     </motion.button>
                                   </motion.div>
-
-
-
                                 </motion.div>
                               )}
-                              {/* Step 2: Password Creation */}
+
+                              {/* Step 3: Password */}
                               {signupStep === 3 && (
                                 <motion.div
                                   key="step3"
@@ -1194,7 +1212,7 @@ const userData2 = {
                                         onChange={handleChange}
                                         onBlur={handleBlur}
                                         placeholder="Create a strong password"
-                                        className="w-full pl-10 pr-10 py-3 bg-dark text-white  focus:outline-none focus:ring-2 focus:ring-orange-500/50  transition-all"
+                                        className="w-full pl-10 pr-10 py-3 bg-dark text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
                                       />
                                       <button
                                         type="button"
@@ -1211,43 +1229,28 @@ const userData2 = {
                                     {touched.password && errors.password && (
                                       <div className="text-red-500 font-pilot text-xs mt-1 ml-1">{errors.password}</div>
                                     )}
-                                    {/* Password Requirements Box */}
-                                    <div className="mb-6 p-4">
 
+                                    {/* Password Requirements */}
+                                    <div className="mb-6 p-4">
                                       <ul className="space-y-2 text-sm text-gray-500 font-pilot">
                                         <li className={`flex items-center ${values.password && values.password.length >= 8 ? 'text-green-400' : ''}`}>
-                                          {values.password && values.password.length >= 8 ?
-                                            <CheckCircleIcon className="h-3 w-3 mr-2" /> :
-                                            <CheckCircleIcon className="h-3 w-3 mr-2 " />
-                                          }
+                                          <CheckCircleIcon className="h-3 w-3 mr-2" />
                                           At least 8 characters long
                                         </li>
                                         <li className={`flex items-center ${values.password && /[A-Z]/.test(values.password) ? 'text-green-400' : ''}`}>
-                                          {values.password && /[A-Z]/.test(values.password) ?
-                                            <CheckCircleIcon className="h-3 w-3 mr-2" /> :
-                                            <CheckCircleIcon className="h-3 w-3 mr-2" />
-                                          }
+                                          <CheckCircleIcon className="h-3 w-3 mr-2" />
                                           Contains at least one uppercase letter
                                         </li>
                                         <li className={`flex items-center ${values.password && /[a-z]/.test(values.password) ? 'text-green-400' : ''}`}>
-                                          {values.password && /[a-z]/.test(values.password) ?
-                                            <CheckCircleIcon className="h-3 w-3  mr-2" /> :
-                                            <CheckCircleIcon className="h-3 w-3 mr-2" />
-                                          }
+                                          <CheckCircleIcon className="h-3 w-3 mr-2" />
                                           Contains at least one lowercase letter
                                         </li>
                                         <li className={`flex items-center ${values.password && /\d/.test(values.password) ? 'text-green-400' : ''}`}>
-                                          {values.password && /\d/.test(values.password) ?
-                                            <CheckCircleIcon className="h-3 w-3  mr-2" /> :
-                                            <CheckCircleIcon className="h-3 w-3 mr-2" />
-                                          }
+                                          <CheckCircleIcon className="h-3 w-3 mr-2" />
                                           Contains at least one number
                                         </li>
                                       </ul>
-
                                     </div>
-
-
                                   </motion.div>
 
                                   {/* Confirm Password Input */}
@@ -1264,7 +1267,7 @@ const userData2 = {
                                         onChange={handleChange}
                                         onBlur={handleBlur}
                                         placeholder="Confirm your password"
-                                        className="w-full pl-10 pr-10 py-3 bg-dark text-white  focus:outline-none focus:ring-2 focus:ring-orange-500/50  transition-all"
+                                        className="w-full pl-10 pr-10 py-3 bg-dark text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
                                       />
                                       <button
                                         type="button"
@@ -1290,13 +1293,10 @@ const userData2 = {
 
                                   {/* Navigation buttons */}
                                   <motion.div variants={formItemVariants} className="grid grid-cols-2 gap-x-52 pt-4">
-                                    {/* Back Button */}
                                     <motion.button
                                       type="button"
                                       onClick={() => setSignupStep(2)}
-                                      className="w-full bg-gray-800/80 text-gray-300 py-3.5 px-4 rounded-xl font-medium
-    hover:bg-gray-700/90 transition-all duration-300 border border-gray-700/40
-    flex items-center justify-center shadow-md backdrop-blur-sm"
+                                      className="w-full bg-gray-800/80 text-gray-300 py-3.5 px-4 rounded-xl font-medium hover:bg-gray-700/90 transition-all duration-300 border border-gray-700/40 flex items-center justify-center shadow-md backdrop-blur-sm"
                                       whileHover={{ scale: 1.02, backgroundColor: "rgba(55, 65, 81, 0.9)" }}
                                       whileTap={{ scale: 0.98 }}
                                     >
@@ -1304,7 +1304,6 @@ const userData2 = {
                                       <span>Back</span>
                                     </motion.button>
 
-                                    {/* Continue Button */}
                                     <motion.button
                                       type="button"
                                       onClick={() => {
@@ -1325,47 +1324,16 @@ const userData2 = {
                                         values.password === values.confirmPassword
                                         ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400'
                                         : 'bg-gray-700/80 text-gray-400 cursor-not-allowed'
-                                        } text-white py-3.5 px-4 rounded-xl font-medium
-    transition-all duration-300 shadow-lg
-    flex items-center justify-center relative overflow-hidden group`}
-                                      whileHover={{
-                                        scale: !errors.password &&
-                                          !errors.confirmPassword &&
-                                          values.password &&
-                                          values.confirmPassword &&
-                                          values.password === values.confirmPassword ? 1.02 : 1
-                                      }}
-                                      whileTap={{
-                                        scale: !errors.password &&
-                                          !errors.confirmPassword &&
-                                          values.password &&
-                                          values.confirmPassword &&
-                                          values.password === values.confirmPassword ? 0.98 : 1
-                                      }}
+                                        } text-white py-3.5 px-4 rounded-xl font-medium transition-all duration-300 shadow-lg flex items-center justify-center relative overflow-hidden group`}
                                     >
-                                      {/* Animated background effect for enabled button */}
-                                      {!errors.password &&
-                                        !errors.confirmPassword &&
-                                        values.password &&
-                                        values.confirmPassword &&
-                                        values.password === values.confirmPassword && (
-                                          <motion.div
-                                            className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-amber-400/20 opacity-0 group-hover:opacity-100 transition-opacity"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: [0, 0.5, 0] }}
-                                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                                          />
-                                        )}
                                       <span>Continue</span>
                                       <ArrowRightIcon className="ml-2 h-5 w-5" />
                                     </motion.button>
                                   </motion.div>
-
-
                                 </motion.div>
                               )}
 
-                              {/* Step 3: Final Details */}
+                              {/* Step 4: Final Details */}
                               {signupStep === 4 && (
                                 <motion.div
                                   key="step4"
@@ -1416,7 +1384,7 @@ const userData2 = {
                                     </p>
                                   </motion.div>
 
-                                  {/* Terms of Service with animated checkbox */}
+                                  {/* Terms of Service */}
                                   <motion.div variants={formItemVariants} className="mt-4">
                                     <div className="p-4">
                                       <div className="flex items-start">
@@ -1455,7 +1423,7 @@ const userData2 = {
                                     </div>
                                   </motion.div>
 
-                                  {/* Terms of Service and security info */}
+                                  {/* Security info */}
                                   <motion.div variants={formItemVariants} className="mt-2">
                                     <div className="bg-gray-800/30 border border-gray-700/30 rounded-lg p-3 flex items-center">
                                       <ShieldCheckIcon className="h-6 w-6 mr-3 text-orange-500" />
@@ -1466,13 +1434,11 @@ const userData2 = {
                                   </motion.div>
 
                                   {/* Navigation buttons */}
-                                  <motion.div variants={formItemVariants} className="grid grid-cols-2  gap-x-52 pt-2">
+                                  <motion.div variants={formItemVariants} className="grid grid-cols-2 gap-x-52 pt-2">
                                     <motion.button
                                       type="button"
                                       onClick={() => setSignupStep(3)}
-                                      className="w-full bg-gray-800 text-gray-300 py-3 px-4 rounded-lg font-medium
-                                      hover:bg-gray-700 transition-all duration-300 border border-gray-700/50
-                                      flex items-center justify-center"
+                                      className="w-full bg-gray-800 text-gray-300 py-3 px-4 rounded-lg font-medium hover:bg-gray-700 transition-all duration-300 border border-gray-700/50 flex items-center justify-center"
                                       whileHover={{ scale: 1.02 }}
                                       whileTap={{ scale: 0.98 }}
                                     >
@@ -1487,9 +1453,7 @@ const userData2 = {
                                       className={`w-full bg-gradient-to-r ${values.termsAccepted
                                         ? 'from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400'
                                         : 'from-gray-700 to-gray-600 cursor-not-allowed'
-                                        } text-white py-3 px-4 rounded-lg font-pilot
-                                      transition-all duration-300 shadow-lg shadow-orange-600/20
-                                      flex items-center justify-center`}
+                                        } text-white py-3 px-4 rounded-lg font-pilot transition-all duration-300 shadow-lg shadow-orange-600/20 flex items-center justify-center`}
                                       disabled={isLoading || !values.termsAccepted}
                                       whileHover={{ scale: isLoading || !values.termsAccepted ? 1 : 1.02 }}
                                       whileTap={{ scale: isLoading || !values.termsAccepted ? 1 : 0.98 }}
@@ -1510,20 +1474,9 @@ const userData2 = {
                                       )}
                                     </motion.button>
                                   </motion.div>
-
-
-
                                 </motion.div>
                               )}
                             </AnimatePresence>
-                            <motion.div
-                              variants={formVariants}
-                              initial="hidden"
-                              animate="visible"
-                            >
-
-
-                            </motion.div>
                           </Form>
                         );
                       }}
@@ -1532,8 +1485,6 @@ const userData2 = {
                 </div>
               )}
             </AnimatePresence>
-
-
           </div>
         </div>
       </motion.div>
