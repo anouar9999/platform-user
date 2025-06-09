@@ -24,7 +24,7 @@ export default function Loading() {
       
     <div className="flex flex-col  justify-center items-center h-screen">
     <Image
-      src="https://moroccogamingexpo.ma/wp-content/uploads/2024/02/Logo-MGE-2025-white.svg"
+      src="/images/logo-gamius-white.png"
       alt="Brand Logo"
       width={350}
       height={100}
@@ -34,7 +34,7 @@ export default function Loading() {
 
     </div>
   
-</div>ssssssssssssssssssssssssssssssssssssss
+</div>
     
   </div>
 

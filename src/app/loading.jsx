@@ -80,9 +80,9 @@ const LoadingOverlay = ({ text }) => {
             animate="animate"
           />
           <img 
-            src='https://moroccogamingexpo.ma/wp-content/uploads/2024/02/Logo-MGE-2025-white.svg' 
+            src='/images/logo-gamius-white.png' 
             className="w-64 h-64 z-10" 
-            alt="Morocco Gaming Expo 2025" 
+            alt="Gamius Logo" 
           />
         </div>
         {/* Text with animated dots */}

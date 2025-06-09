@@ -21,6 +21,7 @@ import {
 import Loader from './Loader';
 import { FaExclamationCircle } from 'react-icons/fa';
 import ServerMessage from './ServerMessage';
+import { SharedDataManager } from '@/utils/test';
 
 export default function AuthForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -36,6 +37,7 @@ export default function AuthForm() {
   const [avatarPreview, setAvatarPreview] = useState(null);
 
   const sharedDataRef = useRef(null);
+  const unsubscribeRef = useRef(null);
   const updateAuthUI = (userData) => {
     console.log('Updating UI for authenticated user:', userData);
     setUserData(userData);
@@ -314,82 +316,84 @@ export default function AuthForm() {
     }
   };
 
-  const handleSubmit = async (values, { setSubmitting }) => {
-    setIsLoading(true);
-    const isLogin = activeTab === 'login';
-    
-    // Save form data to shared storage for multi-window form continuation
-    if (!isLogin) {
-      sharedDataRef.current?.set('signupFormData', values);
-    }
-    
-    try {
-      const url = isLogin
-        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user_login.php`
-        : `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user_register.php`;
+ const handleSubmit = async (values, { setSubmitting }) => {
+  setIsLoading(true);
+  const isLogin = activeTab === 'login';
+  
+  // Save form data to shared storage for multi-window form continuation
+  if (!isLogin) {
+    sharedDataRef.current?.set('signupFormData', values);
+  }
+  
+  try {
+    const url = isLogin
+      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user_login.php`  // ✅ Your existing endpoint
+      : `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user_register.php`;
 
-      let response;
+    let response;
 
-      if (isLogin) {
-        const loginData = {
-          email: values.email,
-          password: values.password,
-        };
+    if (isLogin) {
+      const loginData = {
+        email: values.email,
+        password: values.password,
+      };
 
-        response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(loginData),
-        });
+      response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // 🔥 ADD THIS LINE - Essential for session cookies
+        body: JSON.stringify(loginData),
+      });
 
-        const responseText = await response.text();
-        let data;
-        try {
-          data = JSON.parse(responseText);
-        } catch (e) {
-          throw new Error('Invalid server response format');
-        }
+      const responseText = await response.text();
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        throw new Error('Invalid server response format');
+      }
 
-        if (!response.ok || !data.success) {
-          throw new Error(data.message || 'Login failed');
-        }
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Login failed');
+      }
 
-        const userData = {
-          username: data.username,
-          avatarUrl: data.avatar,
-          userId: data.user_id,
-          userType: data.user_type,
-          sessionToken: data.session_token
-        };
+      const userData = {
+        username: data.username,
+        avatarUrl: data.avatar,
+        userId: data.user_id,
+        userType: data.user_type,
+        sessionToken: data.session_token
+      };
 
-        // Store in localStorage with proper structure
-        const authDataForStorage = {
-          sessionToken: data.session_token,
-          userId: data.user_id,
-          username: data.username,
-          userType: data.user_type,
-          avatarUrl: data.avatar,
-          timestamp: new Date().getTime()
-        };
-        
-        localStorage.setItem('authData', JSON.stringify(authDataForStorage));
+      // Store in localStorage with proper structure
+      const authDataForStorage = {
+        sessionToken: data.session_token,
+        userId: data.user_id,
+        username: data.username,
+        userType: data.user_type,
+        avatarUrl: data.avatar,
+        timestamp: new Date().getTime()
+      };
+      
+      localStorage.setItem('authData', JSON.stringify(authDataForStorage));
 
-        // Store in SharedDataManager (this will sync to other windows)
-        sharedDataRef.current?.setAuthData(userData);
-        
-        // Update local state
-        updateAuthUI(userData);
+      // Store in SharedDataManager (this will sync to other windows)
+      sharedDataRef.current?.setAuthData(userData);
+      
+      // Update local state
+      updateAuthUI(userData);
 
-        setServerMessage({
-          type: 'success',
-          message: `Welcome back, ${data.username}! Redirecting to dashboard...`,
-        });
+      setServerMessage({
+        type: 'success',
+        message: `Welcome back, ${data.username}! Redirecting to home...`,
+      });
 
-        setTimeout(() => {
-          window.location.href = 'http://localhost:3000/choose-to';
-        }, 1500);
+      // 🔥 CHANGE THIS REDIRECT - Instead of choose-to, redirect to Vite app
+      setTimeout(() => {
+        window.location.href = 'http://localhost:3000/choose-to'; // ✅ Redirect to your Vite app
+      }, 1500);
         
       } else {
         // Registration handling (keeping your existing logic)
@@ -665,8 +669,8 @@ export default function AuthForm() {
       <Loader
         message={"Processing..."}
         username={"User"}
-        logo="https://moroccogamingexpo.ma/wp-content/uploads/2024/02/Logo-MGE-2025-white.svg"
-        logoAlt="MGE 2025 Logo"
+        logo="/images/logo-gamius-white.png"
+        logoAlt="Gamius Logo"
       />
     );
   }
@@ -687,7 +691,7 @@ export default function AuthForm() {
 
       <div className={`${activeTab === 'signup' ? 'absolute top-0 left-4' : ''} w-36 z-50 mt-7  overflow-hidden`}>
         <img
-          src="https://moroccogamingexpo.ma/wp-content/uploads/2024/02/Logo-MGE-2025-white.svg"
+          src="/images/logo-gamius-white.png"
           alt="Profile"
           className="w-full h-full object-cover"
         />

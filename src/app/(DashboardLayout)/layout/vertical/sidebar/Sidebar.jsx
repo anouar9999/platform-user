@@ -83,7 +83,7 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
             <div className="absolute top-4 left-4 p-2 w-28 h-12 md:w-32 md:h-20">
               <Link href={'/'}>
                 <Image
-                  src="https://moroccogamingexpo.ma/wp-content/uploads/2024/02/Logo-MGE-2025-white.svg"
+                  src="/images/logo-gamius-white.png"
                   alt="Logo"
                   layout="fill"
                   objectFit="contain"

@@ -19,10 +19,14 @@ const ParticipantTournaments = ({ participantId }) => {
 
   useEffect(() => {
     // Access localStorage only after component mounts (client-side)
-    const user_id = localStorage.getItem("userId");
-    setUserId(user_id);
-    console.log("User ID:", user_id);
-    
+      const localAuthData = localStorage.getItem('authData');
+
+      const parsedData = JSON.parse(localAuthData);
+      console.log(parsedData)
+    const user_id = parsedData.userId;
+    setUserId(parsedData.userId);
+    console.log("User ID:", parsedData.userId);
+
     if (user_id) {
       setIsLoading(true);
       fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/my-tournament.php?user_id=${user_id}`)
