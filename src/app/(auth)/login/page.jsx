@@ -901,7 +901,7 @@ export default function AuthForm() {
                             className="mt-8 text-center"
                           >
                             <p className="text-gray-400 text-sm mb-2">
-                              Tu n'as pas de compte ?
+                              Tu n as pas de compte ?
                             </p>
                             <button
                               type="button"
@@ -983,7 +983,7 @@ export default function AuthForm() {
                                   transition={{ duration: 0.3 }}
                                 >
                                   <h2 className="text-3xl font-ea-football tracking-wide text-white">Choisissez un nom</h2>
-                                  <h2 className="text-3xl font-ea-football tracking-wide text-white">d'utilisateur</h2>
+                                  <h2 className="text-3xl font-ea-football tracking-wide text-white">d utilisateur</h2>
                                   <p className="text-gray-400 font-pilot mt-2">Utilisé pour vous connecter à tous nos jeux.</p>
                                 </motion.div>
                               )}
@@ -1062,7 +1062,7 @@ export default function AuthForm() {
                                           />
                                         </div>
                                         <span className="text-sm text-gray-300 group-hover:text-white font-pilot transition-colors">
-                                          Oui ; Riot peut m'envoyer des informations concernant les nouvelles sorties, les mises à jour du jeu, les événements ou tout autre contenu Riot.
+                                          Oui ; Riot peut m envoyer des informations concernant les nouvelles sorties, les mises à jour du jeu, les événements ou tout autre contenu Riot.
                                         </span>
                                       </label>
                                     </div>
