@@ -382,7 +382,7 @@ const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
-          credentials: 'include', // Essential for session cookies
+          credentials: 'include', // ✅ Now this will work with fixed backend
           body: JSON.stringify(requestBody),
         });
 
@@ -530,7 +530,7 @@ const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
       // Redirect to Vite app
       setTimeout(() => {
         try {
-          window.location.href = `${process.env.NEXT_PUBLIC_FRONTEND_URL}:3000/choose-to`;
+          window.location.href = 'http://localhost:3000/choose-to';
           logStep('LOGIN_REDIRECT_EXECUTED');
         } catch (redirectError) {
           logStep('LOGIN_REDIRECT_ERROR', { error: redirectError.message });
@@ -603,7 +603,7 @@ const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
         response = await fetch(url, {
           method: 'POST',
           body: formData,
-          credentials: 'include',
+          credentials: 'include', // ✅ Now this will work with fixed backend
         });
 
         logStep('REGISTRATION_RESPONSE_RECEIVED', { 
