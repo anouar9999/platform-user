@@ -301,7 +301,7 @@ const ProfileDropdown = () => {
 
             {/* Access Dashboard Link */}
             <a
-              href="http://localhost:3000/tournaments"
+              href={`${process.env.NEXT_PUBLIC_FRONTEND_URL}:3000/tournaments`}
               className="flex items-center justify-between px-2 py-2
                        text-sm text-gray-400 hover:text-white
                        rounded-md hover:bg-white/5

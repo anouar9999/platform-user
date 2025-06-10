@@ -39,14 +39,14 @@ const AnimatedCards = () => {
         image: "images/20250523_2358_Abstract_Game_Landscapes_simple_compose_01jvzjcqsyesps0bxff567n5cb.png",
         title: "Home",
         description: "Welcome to your gaming hub. Start your journey here with everything you need to get started.",
-        link: `http://localhost:5173`,
+        link: `${process.env.NEXT_PUBLIC_FRONTEND_URL}:5173`,
         enabled: true
       },
       {
         image: "images/20250523_2358_Abstract_Game_Landscapes_simple_compose_01jvzjcqszezdbheaacge7fqcv.png",
         title: "Dashboard",
         description: "Track your progress, view statistics, and manage your gaming profile in one place.",
-        link: "http://localhost:3000/tournaments",
+        link: `/tournaments`,
         enabled: true
       },
       {

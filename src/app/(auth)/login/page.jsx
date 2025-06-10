@@ -316,71 +316,206 @@ export default function AuthForm() {
     }
   };
 
- const handleSubmit = async (values, { setSubmitting }) => {
+const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
+  // Step tracking for better debugging
+  const logStep = (step, data = {}) => {
+    console.log(`🔄 Auth Step: ${step}`, {
+      timestamp: new Date().toISOString(),
+      activeTab,
+      signupStep,
+      ...data
+    });
+  };
+
+  // Clear any existing server messages
+  setServerMessage({ type: '', message: '' });
   setIsLoading(true);
+  logStep('FORM_SUBMISSION_START', { isLogin: activeTab === 'login' });
+
   const isLogin = activeTab === 'login';
   
-  // Save form data to shared storage for multi-window form continuation
-  if (!isLogin) {
-    sharedDataRef.current?.set('signupFormData', values);
-  }
-  
   try {
-    const url = isLogin
-      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user_login.php`  // ✅ Your existing endpoint
-      : `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user_register.php`;
+    // Save form data to shared storage for multi-window form continuation
+    if (!isLogin) {
+      logStep('SAVING_SIGNUP_DATA_TO_SHARED_STORAGE');
+      sharedDataRef.current?.set('signupFormData', values);
+    }
+
+    // Determine the endpoint
+    const endpoint = isLogin ? 'user_login.php' : 'user_register.php';
+    const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/${endpoint}`;
+    
+    logStep('PREPARING_REQUEST', { 
+      endpoint, 
+      url,
+      hasBackendUrl: !!process.env.NEXT_PUBLIC_BACKEND_URL 
+    });
+
+    // Validate environment variables
+    if (!process.env.NEXT_PUBLIC_BACKEND_URL) {
+      throw new Error('Backend URL is not configured. Please check your environment variables.');
+    }
 
     let response;
+    let requestBody;
 
     if (isLogin) {
-      const loginData = {
-        email: values.email,
+      // LOGIN FLOW
+      logStep('LOGIN_REQUEST_PREPARATION');
+      
+      // Validate required fields
+      if (!values.email || !values.password) {
+        throw new Error('Email and password are required for login.');
+      }
+
+      requestBody = {
+        email: values.email.trim(),
         password: values.password,
       };
 
-      response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // 🔥 ADD THIS LINE - Essential for session cookies
-        body: JSON.stringify(loginData),
-      });
+      logStep('SENDING_LOGIN_REQUEST', { email: values.email });
 
-      const responseText = await response.text();
+      try {
+        response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          credentials: 'include', // Essential for session cookies
+          body: JSON.stringify(requestBody),
+        });
+
+        logStep('LOGIN_RESPONSE_RECEIVED', { 
+          status: response.status, 
+          statusText: response.statusText,
+          ok: response.ok 
+        });
+
+      } catch (networkError) {
+        logStep('LOGIN_NETWORK_ERROR', { error: networkError.message });
+        throw new Error('Network error: Unable to connect to the server. Please check your internet connection.');
+      }
+
+      // Parse response
+      let responseText;
+      try {
+        responseText = await response.text();
+        logStep('LOGIN_RESPONSE_TEXT_RECEIVED', { 
+          hasResponse: !!responseText,
+          responseLength: responseText?.length 
+        });
+      } catch (parseError) {
+        logStep('LOGIN_RESPONSE_PARSE_ERROR', { error: parseError.message });
+        throw new Error('Failed to read server response. Please try again.');
+      }
+
       let data;
       try {
         data = JSON.parse(responseText);
-      } catch (e) {
-        throw new Error('Invalid server response format');
+        logStep('LOGIN_RESPONSE_PARSED', { 
+          hasData: !!data,
+          success: data?.success,
+          hasMessage: !!data?.message 
+        });
+      } catch (jsonError) {
+        logStep('LOGIN_JSON_PARSE_ERROR', { 
+          error: jsonError.message,
+          responseText: responseText?.substring(0, 200) 
+        });
+        throw new Error('Invalid server response format. Please contact support if this persists.');
       }
 
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Login failed');
+      // Handle login response
+      if (!response.ok) {
+        logStep('LOGIN_HTTP_ERROR', { 
+          status: response.status,
+          message: data?.message 
+        });
+        
+        // Handle specific HTTP status codes
+        switch (response.status) {
+          case 400:
+            throw new Error(data?.message || 'Invalid request. Please check your credentials.');
+          case 401:
+            throw new Error(data?.message || 'Invalid email or password.');
+          case 403:
+            throw new Error(data?.message || 'Account access forbidden. Please contact support.');
+          case 404:
+            throw new Error('Login service not found. Please contact support.');
+          case 429:
+            throw new Error('Too many login attempts. Please wait a few minutes and try again.');
+          case 500:
+            throw new Error('Server error. Please try again later.');
+          default:
+            throw new Error(data?.message || `Login failed with status ${response.status}`);
+        }
       }
 
+      if (!data.success) {
+        logStep('LOGIN_API_ERROR', { message: data?.message });
+        
+        // Handle specific API error messages
+        const errorMessage = data?.message?.toLowerCase() || '';
+        if (errorMessage.includes('email')) {
+          setFieldError('email', data.message);
+        } else if (errorMessage.includes('password')) {
+          setFieldError('password', data.message);
+        }
+        
+        throw new Error(data.message || 'Login failed. Please check your credentials.');
+      }
+
+      // Validate response data structure
+      if (!data.username || !data.user_id) {
+        logStep('LOGIN_INVALID_RESPONSE_STRUCTURE', { 
+          hasUsername: !!data.username,
+          hasUserId: !!data.user_id 
+        });
+        throw new Error('Invalid login response. Please try again.');
+      }
+
+      logStep('LOGIN_SUCCESS', { 
+        username: data.username,
+        userId: data.user_id,
+        userType: data.user_type 
+      });
+
+      // Prepare user data
       const userData = {
         username: data.username,
-        avatarUrl: data.avatar,
+        avatarUrl: data.avatar || null,
         userId: data.user_id,
-        userType: data.user_type,
-        sessionToken: data.session_token
+        userType: data.user_type || 'user',
+        sessionToken: data.session_token || null
       };
 
       // Store in localStorage with proper structure
       const authDataForStorage = {
-        sessionToken: data.session_token,
+        sessionToken: data.session_token || null,
         userId: data.user_id,
         username: data.username,
-        userType: data.user_type,
-        avatarUrl: data.avatar,
+        userType: data.user_type || 'user',
+        avatarUrl: data.avatar || null,
         timestamp: new Date().getTime()
       };
       
-      localStorage.setItem('authData', JSON.stringify(authDataForStorage));
+      try {
+        localStorage.setItem('authData', JSON.stringify(authDataForStorage));
+        logStep('LOGIN_DATA_STORED_LOCALLY');
+      } catch (storageError) {
+        logStep('LOGIN_STORAGE_ERROR', { error: storageError.message });
+        console.warn('Failed to store auth data locally:', storageError);
+      }
 
       // Store in SharedDataManager (this will sync to other windows)
-      sharedDataRef.current?.setAuthData(userData);
+      try {
+        sharedDataRef.current?.setAuthData(userData);
+        logStep('LOGIN_DATA_SHARED');
+      } catch (sharedError) {
+        logStep('LOGIN_SHARED_STORAGE_ERROR', { error: sharedError.message });
+        console.warn('Failed to share auth data:', sharedError);
+      }
       
       // Update local state
       updateAuthUI(userData);
@@ -390,69 +525,238 @@ export default function AuthForm() {
         message: `Welcome back, ${data.username}! Redirecting to home...`,
       });
 
-      // 🔥 CHANGE THIS REDIRECT - Instead of choose-to, redirect to Vite app
+      logStep('LOGIN_REDIRECT_INITIATED');
+      
+      // Redirect to Vite app
       setTimeout(() => {
-        window.location.href = 'http://localhost:3000/choose-to'; // ✅ Redirect to your Vite app
-      }, 1500);
-        
-      } else {
-        // Registration handling (keeping your existing logic)
-        const formData = new FormData();
-        formData.append('username', values.username);
-        formData.append('email', values.email);
-        formData.append('password', values.password);
-        formData.append('bio', values.bio || '');
-        formData.append('is_verified', '1');
-
-        if (values.avatar && values.avatar instanceof File) {
-          formData.append('avatar', values.avatar, values.avatar.name);
+        try {
+          window.location.href = `${process.env.NEXT_PUBLIC_FRONTEND_URL}:3000/choose-to`;
+          logStep('LOGIN_REDIRECT_EXECUTED');
+        } catch (redirectError) {
+          logStep('LOGIN_REDIRECT_ERROR', { error: redirectError.message });
+          console.error('Redirect failed:', redirectError);
         }
+      }, 1500);
 
+    } else {
+      // REGISTRATION FLOW
+      logStep('REGISTRATION_REQUEST_PREPARATION', { currentStep: signupStep });
+      
+      // Validate required fields for registration
+      const requiredFields = ['username', 'email', 'password'];
+      const missingFields = requiredFields.filter(field => !values[field]);
+      
+      if (missingFields.length > 0) {
+        logStep('REGISTRATION_MISSING_FIELDS', { missingFields });
+        throw new Error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+      }
+
+      if (values.password !== values.confirmPassword) {
+        logStep('REGISTRATION_PASSWORD_MISMATCH');
+        setFieldError('confirmPassword', 'Passwords do not match');
+        throw new Error('Passwords do not match');
+      }
+
+      if (!values.termsAccepted) {
+        logStep('REGISTRATION_TERMS_NOT_ACCEPTED');
+        setFieldError('termsAccepted', 'You must accept the terms and conditions');
+        throw new Error('You must accept the terms and conditions');
+      }
+
+      // Prepare form data
+      const formData = new FormData();
+      formData.append('username', values.username.trim());
+      formData.append('email', values.email.trim());
+      formData.append('password', values.password);
+      formData.append('bio', values.bio || '');
+      formData.append('is_verified', '1');
+
+      // Handle avatar upload
+      if (values.avatar && values.avatar instanceof File) {
+        logStep('REGISTRATION_AVATAR_PROCESSING', { 
+          fileName: values.avatar.name,
+          fileSize: values.avatar.size,
+          fileType: values.avatar.type 
+        });
+        
+        // Validate file size (5MB limit)
+        if (values.avatar.size > 5 * 1024 * 1024) {
+          throw new Error('Avatar file size must be less than 5MB');
+        }
+        
+        // Validate file type
+        const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!validTypes.includes(values.avatar.type)) {
+          throw new Error('Avatar must be a valid image file (JPG, PNG, GIF, or WebP)');
+        }
+        
+        formData.append('avatar', values.avatar, values.avatar.name);
+      }
+
+      logStep('SENDING_REGISTRATION_REQUEST', { 
+        username: values.username,
+        email: values.email,
+        hasAvatar: !!values.avatar 
+      });
+
+      try {
         response = await fetch(url, {
           method: 'POST',
           body: formData,
+          credentials: 'include',
         });
 
-        const responseText = await response.text();
-        let data;
-        try {
-          data = JSON.parse(responseText);
-        } catch (e) {
-          throw new Error('Invalid server response format');
-        }
+        logStep('REGISTRATION_RESPONSE_RECEIVED', { 
+          status: response.status, 
+          statusText: response.statusText,
+          ok: response.ok 
+        });
 
-        if (!response.ok) {
-          throw new Error(data.message || `Server error: ${response.status}`);
-        }
+      } catch (networkError) {
+        logStep('REGISTRATION_NETWORK_ERROR', { error: networkError.message });
+        throw new Error('Network error: Unable to connect to the server. Please check your internet connection.');
+      }
 
-        if (data.success) {
-          // Clear signup form data after successful registration
-          sharedDataRef.current?.delete('signupFormData');
-          
-          setServerMessage({
-            type: 'success',
-            message: 'Account created successfully! You can now log in.',
-          });
+      // Parse registration response
+      let responseText;
+      try {
+        responseText = await response.text();
+        logStep('REGISTRATION_RESPONSE_TEXT_RECEIVED', { 
+          hasResponse: !!responseText,
+          responseLength: responseText?.length 
+        });
+      } catch (parseError) {
+        logStep('REGISTRATION_RESPONSE_PARSE_ERROR', { error: parseError.message });
+        throw new Error('Failed to read server response. Please try again.');
+      }
 
-          setTimeout(() => {
-            setActiveTab('login');
-            setIsLoading(false);
-          }, 2000);
-        } else {
-          throw new Error(data.message || 'Registration failed');
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        logStep('REGISTRATION_RESPONSE_PARSED', { 
+          hasData: !!data,
+          success: data?.success,
+          hasMessage: !!data?.message 
+        });
+      } catch (jsonError) {
+        logStep('REGISTRATION_JSON_PARSE_ERROR', { 
+          error: jsonError.message,
+          responseText: responseText?.substring(0, 200) 
+        });
+        throw new Error('Invalid server response format. Please contact support if this persists.');
+      }
+
+      // Handle registration response
+      if (!response.ok) {
+        logStep('REGISTRATION_HTTP_ERROR', { 
+          status: response.status,
+          message: data?.message 
+        });
+        
+        // Handle specific HTTP status codes
+        switch (response.status) {
+          case 400:
+            throw new Error(data?.message || 'Invalid registration data. Please check your information.');
+          case 409:
+            const conflictMessage = data?.message?.toLowerCase() || '';
+            if (conflictMessage.includes('email')) {
+              setFieldError('email', 'This email is already registered');
+            } else if (conflictMessage.includes('username')) {
+              setFieldError('username', 'This username is already taken');
+            }
+            throw new Error(data?.message || 'Email or username already exists.');
+          case 413:
+            throw new Error('File too large. Please choose a smaller avatar image.');
+          case 415:
+            throw new Error('Invalid file type. Please upload a valid image file.');
+          case 429:
+            throw new Error('Too many registration attempts. Please wait a few minutes and try again.');
+          case 500:
+            throw new Error('Server error. Please try again later.');
+          default:
+            throw new Error(data?.message || `Registration failed with status ${response.status}`);
         }
       }
-    } catch (error) {
-      console.error('Error details:', error);
-      setServerMessage({
-        type: 'error',
-        message: error.message || 'An error occurred. Please try again.',
+
+      if (!data.success) {
+        logStep('REGISTRATION_API_ERROR', { message: data?.message });
+        
+        // Handle specific API error messages
+        const errorMessage = data?.message?.toLowerCase() || '';
+        if (errorMessage.includes('email')) {
+          setFieldError('email', data.message);
+        } else if (errorMessage.includes('username')) {
+          setFieldError('username', data.message);
+        } else if (errorMessage.includes('password')) {
+          setFieldError('password', data.message);
+        }
+        
+        throw new Error(data.message || 'Registration failed. Please try again.');
+      }
+
+      logStep('REGISTRATION_SUCCESS', { 
+        message: data.message,
+        userId: data.user_id 
       });
-      setIsLoading(false);
-    } finally {
-      setSubmitting(false);
+
+      // Clear signup form data after successful registration
+      try {
+        sharedDataRef.current?.delete('signupFormData');
+        logStep('REGISTRATION_CLEANUP_COMPLETED');
+      } catch (cleanupError) {
+        logStep('REGISTRATION_CLEANUP_ERROR', { error: cleanupError.message });
+        console.warn('Failed to clean up signup form data:', cleanupError);
+      }
+      
+      setServerMessage({
+        type: 'success',
+        message: 'Account created successfully! You can now log in.',
+      });
+
+      // Switch to login tab after successful registration
+      setTimeout(() => {
+        setActiveTab('login');
+        setSignupStep(1);
+        setIsLoading(false);
+        logStep('REGISTRATION_SWITCHED_TO_LOGIN');
+      }, 2000);
     }
-  };
+
+  } catch (error) {
+    logStep('FORM_SUBMISSION_ERROR', { 
+      error: error.message,
+      stack: error.stack?.substring(0, 500) 
+    });
+    
+    console.error('Authentication error:', {
+      message: error.message,
+      stack: error.stack,
+      isLogin,
+      signupStep,
+      timestamp: new Date().toISOString()
+    });
+
+    // Set appropriate error message
+    let errorMessage = error.message;
+    
+    // Fallback error messages
+    if (!errorMessage || errorMessage === 'Failed to fetch') {
+      errorMessage = isLogin 
+        ? 'Unable to connect to login service. Please check your internet connection and try again.'
+        : 'Unable to connect to registration service. Please check your internet connection and try again.';
+    }
+
+    setServerMessage({
+      type: 'error',
+      message: errorMessage,
+    });
+
+  } finally {
+    logStep('FORM_SUBMISSION_COMPLETE');
+    setIsLoading(false);
+    setSubmitting(false);
+  }
+};
 
   // Toggle password visibility
   const togglePasswordVisibility = () => {
