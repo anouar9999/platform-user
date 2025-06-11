@@ -529,8 +529,9 @@ const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
       
       // Redirect to Vite app
       setTimeout(() => {
+
+        window.location.href = `${process.env.NEXT_PUBLIC_FRONTEND_URL}:3000/choose-to`; // ✅ Redirect to your Vite app
         try {
-          window.location.href = 'http://localhost:3000/choose-to';
           logStep('LOGIN_REDIRECT_EXECUTED');
         } catch (redirectError) {
           logStep('LOGIN_REDIRECT_ERROR', { error: redirectError.message });
