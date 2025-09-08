@@ -24,8 +24,8 @@ const useTeamsData = (userId) => {
     try {
       const response = await fetch(`${BACKEND_URL}/api/get_teams.php`, {
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
 
       // Better error handling
@@ -96,16 +96,19 @@ const TeamHub = () => {
   const [isCreateTeamOpen, setIsCreateTeamOpen] = useState(false);
   const [userId, setUserId] = useState(null);
   const { addToast } = useToast();
-  
+
   // Move localStorage to useEffect
   useEffect(() => {
     // Access localStorage only after component mounts (client-side)
-    const id = localStorage.getItem('userId');
-    if (id) {
-      setUserId(parseInt(id));
+    const localAuthData = localStorage.getItem('authData');
+
+    const parsedData = JSON.parse(localAuthData);
+    console.log(parsedData.userId)
+    if (parsedData.userId) {
+      setUserId(parsedData.userId);
     }
   }, []);
-  
+
   const { allTeams, myTeams, isLoading, error, refreshTeams } = useTeamsData(userId);
 
   // Get the page title based on active tab
@@ -148,63 +151,71 @@ const TeamHub = () => {
     refreshTeams();
   }, [refreshTeams]);
 
- // Example of how to properly make the fetch request from your Next.js frontend
+  // Example of how to properly make the fetch request from your Next.js frontend
 
-const handleJoinTeamRequest = async (teamId) => {
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/team_api.php?endpoint=join-request`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        team_id: teamId,
-        user_id: userId, // Make sure this variable is defined
-        role: 'Mid', // You can make this dynamic based on user selection
-          rank: 'Unranked', // You can make this dynamic based on user's actual rank
-    
-      }),
-      mode: 'cors', // Explicitly set CORS mode
-    });
+  const handleJoinTeamRequest = async (teamId) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/team_api.php?endpoint=join-request`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            team_id: teamId,
+            user_id: userId, // Make sure this variable is defined
+            role: 'Mid', // You can make this dynamic based on user selection
+            rank: 'Unranked', // You can make this dynamic based on user's actual rank
+          }),
+          mode: 'cors', // Explicitly set CORS mode
+        },
+      );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to send join request');
-    }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to send join request');
+      }
 
-    const data = await response.json();
-    
-    if (data.success) {
-      // Show success message
+      const data = await response.json();
+
+      if (data.success) {
+        // Show success message
+        addToast({
+          type: 'success',
+          message: 'Join request sent successfully!',
+          duration: 5000,
+          position: 'bottom-right',
+        });
+        // Update UI or state as needed
+      } else {
+        throw new Error(data.message || 'Failed to send join request');
+      }
+    } catch (error) {
+      console.error('Error sending join request:', error);
+      // Show error message
       addToast({
-        type: 'success',
-        message: 'Join request sent successfully!',
+        type: 'error',
+        message: `Error: ${error.message}`,
         duration: 5000,
         position: 'bottom-right',
       });
-      // Update UI or state as needed
-    } else {
-      throw new Error(data.message || 'Failed to send join request');
     }
-  } catch (error) {
-    console.error('Error sending join request:', error);
-    // Show error message
-    addToast({
-      type: 'error',
-      message: `Error: ${error.message}`,
-      duration: 5000,
-      position: 'bottom-right',
-    });
-  }
-};
+  };
 
-  const isInMyTeams = useCallback((team) => {
-    return myTeams.some((myTeam) => myTeam.id === team.id);
-  }, [myTeams]);
+  const isInMyTeams = useCallback(
+    (team) => {
+      return myTeams.some((myTeam) => myTeam.id === team.id);
+    },
+    [myTeams],
+  );
 
-  const isTeamOwner = useCallback((team) => {
-    return parseInt(team?.owner_id) === userId;
-  }, [userId]);
+  const isTeamOwner = useCallback(
+    (team) => {
+      return parseInt(team?.owner_id) === userId;
+    },
+    [userId],
+  );
 
   const handleAddTeam = () => {
     if (!userId) {
@@ -240,7 +251,7 @@ const handleJoinTeamRequest = async (teamId) => {
     return (
       <div className="text-center py-8 text-red-500">
         <p>Error loading teams: {error.message}</p>
-        <button 
+        <button
           onClick={refreshTeams}
           className="mt-4 px-4 py-2 bg-primary text-white rounded hover:bg-primary/80 transition-colors"
         >
@@ -255,13 +266,10 @@ const handleJoinTeamRequest = async (teamId) => {
       <div className="my-8">
         <div className="flex items-center text-primary">
           <IconTournament />
-          
+
           <p className="mx-2 text-lg font-bold font-mono uppercase">UNITE AND TRIUMPH</p>
-          
         </div>
-        <h1 className="text-4xl flex items-center font-custom tracking-wider">
-        {getPageTitle()}
-      </h1>
+        <h1 className="text-4xl flex items-center font-custom tracking-wider">{getPageTitle()}</h1>
       </div>
       <div className="w-full space-y-reverse mb-0">
         {/* Tabs Navigation */}
@@ -415,15 +423,14 @@ const TeamCard = ({ team, onClick, isInMyTeams }) => (
           <div className="absolute inset-0 bg-black bg-opacity-40 hover:bg-opacity-30 transition-opacity duration-300"></div>
 
           {/* Add an indicator for teams in "My Teams" if needed */}
-          
         </div>
       ) : (
         <div className="w-full h-full flex items-center justify-center bg-gray-700">
           {team.logo ? (
-            <img 
-              className="w-16 h-16 sm:w-20 sm:h-20 object-contain" 
+            <img
+              className="w-16 h-16 sm:w-20 sm:h-20 object-contain"
               src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${team.logo}`}
-              alt={`${team.name} logo`} 
+              alt={`${team.name} logo`}
             />
           ) : (
             <UserCircle className="w-16 h-16 sm:w-20 sm:h-20 text-gray-500" />
@@ -434,7 +441,6 @@ const TeamCard = ({ team, onClick, isInMyTeams }) => (
         <h5 className="text-lg sm:text-xl font-custom tracking-widest text-white truncate">
           {team.name}
         </h5>
-        
       </div>
     </div>
   </div>

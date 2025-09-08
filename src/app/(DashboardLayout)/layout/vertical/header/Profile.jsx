@@ -300,7 +300,7 @@ const ProfileDropdown = () => {
             </div>
 
             {/* Access Dashboard Link */}
-            <a
+            {/* <a
               href={`${process.env.NEXT_PUBLIC_FRONTEND_URL}:3000/tournaments`}
               className="flex items-center justify-between px-2 py-2
                        text-sm text-gray-400 hover:text-white
@@ -312,7 +312,7 @@ const ProfileDropdown = () => {
                 <TbDoorEnter className="h-4 w-4 text-green-400" />
                 <span>Access Dashboard</span>
               </div>
-            </a>
+            </a> */}
             
             {/* Sign Out Button */}
             <button

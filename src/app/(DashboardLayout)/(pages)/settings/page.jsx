@@ -29,16 +29,20 @@ const Profile = () => {
   // Move localStorage to useEffect
   useEffect(() => {
     // Get userId from localStorage after component mounts (client-side only)
-    const id = localStorage.getItem('userId');
-    setUserId(id);
+     const localAuthData = localStorage.getItem('authData');
+
+      const parsedData = JSON.parse(localAuthData);
+          const user_id = parsedData.userId;
+
+    setUserId(user_id);
     
-    if (id) fetchUserSettings(id);
+    if (user_id) fetchUserSettings(user_id);
   }, []);
 
-  const fetchUserSettings = async (id) => {
+  const fetchUserSettings = async (user_id) => {
     try {
       setLoading(true);
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user_settings.php?id=${id}`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user_settings.php?id=${user_id}`);
       console.log(response.data.data);
       if (response.data) {
         setUser(prev => ({ ...prev, ...response.data.data }));

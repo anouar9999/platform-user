@@ -987,9 +987,9 @@ const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
       <div className="absolute inset-0 bg-gradient-to-t from-transparent to-secondary/80 "></div>
       
       {/* ✅ Add auth status display */}
-      <div className="absolute top-4 right-4 z-50">
+      {/* <div className="absolute top-4 right-4 z-50">
         {renderAuthStatus()}
-      </div>
+      </div> */}
 
       {/* Inject animated gradient CSS */}
       <style dangerouslySetInnerHTML={{ __html: animatedGradientStyle }} />

@@ -98,7 +98,7 @@ const ParticipantTournaments = ({ participantId }) => {
 
         <h1 className="text-5xl flex items-center font-custom tracking-wider"> YOUR TOURNAMENT JOURNEY </h1>
       </div>
-      {tournaments.length === 0 ? (
+      {(tournaments?.length ?? 0) === 0  ? (
         <div className="text-center text-gray-400 mt-8">
           <SearchX className="mx-auto mb-4 w-16 h-16" />
           <p>Vous n avez participé à aucun tournoi correspondant à votre recherche.</p>
