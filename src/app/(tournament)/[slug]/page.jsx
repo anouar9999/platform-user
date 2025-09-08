@@ -26,7 +26,7 @@ import SingleTournament from './tournamentBracket';
 import BattleRoyale from './battle_royale';
 import RoundRobinTournament from './tournamentRoundRobin';
 import DoubleTournament from './tournamentDouble';
-
+export const runtime = 'edge';
 const SquadFormatCard = ({ icon, title, subTitle }) => (
   <div className="bg-gray-800 p-4 rounded-lg flex flex-col items-center text-center font-bold font-pilot">
     {typeof icon === 'string' ? (

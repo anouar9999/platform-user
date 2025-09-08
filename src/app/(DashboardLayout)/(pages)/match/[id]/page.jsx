@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Share2, Trophy } from 'lucide-react';
 import { Dialog } from '@headlessui/react';
 import { motion, AnimatePresence } from 'framer-motion';
-
+export const runtime = 'edge';
 const ScoreInputDialog = ({ isOpen, closeDialog, onSave, teamA, teamB }) => {
   const [scoreA, setScoreA] = useState('');
   const [scoreB, setScoreB] = useState('');
