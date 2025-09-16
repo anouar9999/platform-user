@@ -26,7 +26,7 @@ import SingleTournament from './tournamentBracket';
 import BattleRoyale from './battle_royale';
 import RoundRobinTournament from './tournamentRoundRobin';
 import DoubleTournament from './tournamentDouble';
-
+export const runtime = 'edge';
 const SquadFormatCard = ({ icon, title, subTitle }) => (
   <div className="bg-gray-800 p-4 rounded-lg flex flex-col items-center text-center font-bold font-pilot">
     {typeof icon === 'string' ? (
@@ -272,7 +272,7 @@ const EsportsTournamentSidebar = () => {
         <div className="relative mb-8 flex justify-center">
           <div className="flex flex-col justify-center items-center">
             <Image
-              src="https://moroccogamingexpo.ma/wp-content/uploads/2024/02/Logo-MGE-2025-white.svg"
+              src="/images/logo-gamius-white.png"
               alt="Brand Logo"
               width={300}
               height={80}

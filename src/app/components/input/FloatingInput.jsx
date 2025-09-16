@@ -40,14 +40,14 @@ const FloatingLabelInput = ({
           className={`
             ${classNames}
             w-full 
-            bg-dark
-            angular-cut
-            text-white 
+           bg-gray-800/70
             
+            text-white 
+            rounded-lg
             text-sm 
             text-[10pt] 
             px-6 
-            py-3 
+            py-2.5
             focus:outline-none 
             focus:ring-2 
             focus:ring-black/20 
@@ -85,7 +85,7 @@ const FloatingLabelInput = ({
           pointer-events-none 
           ${error ? 'text-red-400' : 'text-gray-400'}
           ${(isFocused || value) 
-            ? '-translate-y-9 top-5 left-4 text-xs rounded-md bg-dark px-2' 
+            ? '-translate-y-9 top-7 left-4 text-xs    bg-gray-800/70 px-2' 
             : 'text-base left-6 top-1/2 -translate-y-1/2'
           }
         `}

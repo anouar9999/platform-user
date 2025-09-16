@@ -19,10 +19,14 @@ const ParticipantTournaments = ({ participantId }) => {
 
   useEffect(() => {
     // Access localStorage only after component mounts (client-side)
-    const user_id = localStorage.getItem("userId");
-    setUserId(user_id);
-    console.log("User ID:", user_id);
-    
+      const localAuthData = localStorage.getItem('authData');
+
+      const parsedData = JSON.parse(localAuthData);
+      console.log(parsedData)
+    const user_id = parsedData.userId;
+    setUserId(parsedData.userId);
+    console.log("User ID:", parsedData.userId);
+
     if (user_id) {
       setIsLoading(true);
       fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/my-tournament.php?user_id=${user_id}`)
@@ -94,7 +98,7 @@ const ParticipantTournaments = ({ participantId }) => {
 
         <h1 className="text-5xl flex items-center font-custom tracking-wider"> YOUR TOURNAMENT JOURNEY </h1>
       </div>
-      {tournaments.length === 0 ? (
+      {(tournaments?.length ?? 0) === 0  ? (
         <div className="text-center text-gray-400 mt-8">
           <SearchX className="mx-auto mb-4 w-16 h-16" />
           <p>Vous n avez participé à aucun tournoi correspondant à votre recherche.</p>

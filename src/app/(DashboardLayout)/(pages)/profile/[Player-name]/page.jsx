@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { ChevronRight, CircleUserRound, Gamepad2, Joystick, Plus, Shapes, Wallet, Settings, Users, Calendar, FileText, PlusCircle, MapPin } from 'lucide-react';
 import PrizeList from '@/app/(DashboardLayout)/PrizeList';
 import Image from 'next/image';
-
+export const runtime = 'edge';
 const NeonSharpEdgedProgressBar = ({ progress }) => (
   <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
     <div

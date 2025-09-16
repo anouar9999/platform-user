@@ -17,6 +17,7 @@ import { useToast } from '@/app/components/toast/ToastProviderContext';
 import FloatingLabelInput from '@/app/components/input/FloatingInput';
 import FloatingLabelTextArea from '@/app/components/FloatingTextArea';
 import { getValidationSchemaForStep } from './FormValidation';
+import { set } from 'lodash';
 
 const INPUT_BASE_CLASSES =
   'w-full bg-gray-900/50 px-4 py-2.5 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500';
@@ -164,8 +165,13 @@ const CreateTeamForm = ({ isOpen, onClose, currentUser, onFinish }) => {
   const [bannerPreview, setBannerPreview] = useState(null);
   const { addToast } = useToast();
   const [Games, setGames] = useState();
-
+  const [userId, setUserId] = useState(null);
   useEffect(() => {
+      const localAuthData = localStorage.getItem('authData');
+
+      const parsedData = JSON.parse(localAuthData);
+      console.log(parsedData.userId)
+      setUserId(parsedData.userId);
     const fetchTournaments = async () => {
       try {
         setLoading(true);
@@ -303,7 +309,8 @@ const CreateTeamForm = ({ isOpen, onClose, currentUser, onFinish }) => {
     
     try {
       // Get the current user ID (owner who's creating the team)
-      const userId = localStorage.getItem('userId');
+   
+      
       if (!userId) throw new Error('User not authenticated');
   
       // Structure the data to match teams table

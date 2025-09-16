@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Camera, Eye } from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+export const runtime = 'edge';
 const TournamentEdit = () => {
   const router = useRouter();
   const { id } = useParams();

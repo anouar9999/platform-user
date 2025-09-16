@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Cross-Storage Hub</title>
+</head>
+<body>
+  <script type="text/javascript">
+    // cross-storage hub implementation
+    (function(root) {
+      // Cross storage hub class
+      function CrossStorageHub(permissions) {
+        this.permissions = permissions || [];
+        this.origin = null;
+        this.win = null;
+      }
+
+      // Message handler, checks permissions and routes methods
+      CrossStorageHub.prototype.handleMessage = function(e) {
+        var i, error, request, method, args, origin, match;
+
+        // Ensure message is well-formed
+        if (!e.data || typeof e.data !== 'string') {
+          return;
+        }
+
+        // Parse message
+        try {
+          request = JSON.parse(e.data);
+        } catch(err) {
+          return;
+        }
+
+        // Check required fields
+        if (!request.method || !request.id) {
+          return;
+        }
+
+        // Find matching permission
+        origin = e.origin;
+        match = this.findPermission(origin, request.method);
+        if (!match) {
+          error = 'Invalid permissions for ' + request.method;
+          this.respond(e.source, request.id, {error: error});
+          return;
+        }
+
+        // Get method and args
+        method = request.method;
+        args = request.args || [];
+
+        // Process request
+        if (method === 'get') {
+          this.handleGet(e.source, request.id, args);
+        } else if (method === 'set') {
+          this.handleSet(e.source, request.id, args);
+        } else if (method === 'del') {
+          this.handleDel(e.source, request.id, args);
+        } else if (method === 'clear') {
+          this.handleClear(e.source, request.id, args);
+        } else if (method === 'getKeys') {
+          this.handleGetKeys(e.source, request.id, args);
+        }
+      };
+
+      // Find matching permission entry
+      CrossStorageHub.prototype.findPermission = function(origin, method) {
+        var i, entry, match;
+
+        for (i = 0; i < this.permissions.length; i++) {
+          entry = this.permissions[i];
+
+          // Match origin pattern
+          if (entry.origin instanceof RegExp) {
+            match = entry.origin.test(origin);
+          } else {
+            match = entry.origin === '*' || entry.origin === origin;
+          }
+
+          if (!match) {
+            continue;
+          }
+
+          // Match method
+          if (entry.methods === '*' || entry.methods.indexOf(method) !== -1) {
+            return entry;
+          }
+        }
+
+        return false;
+      };
+
+      // Send response to client
+      CrossStorageHub.prototype.respond = function(source, id, data) {
+        var response = JSON.stringify({
+          id: id,
+          data: data
+        });
+
+        source.postMessage(response, '*');
+      };
+
+      // Handle get request
+      CrossStorageHub.prototype.handleGet = function(source, id, args) {
+        var key, result;
+
+        if (!args.length) {
+          this.respond(source, id, {error: 'Missing key'});
+          return;
+        }
+
+        key = args[0];
+        if (typeof key !== 'string') {
+          this.respond(source, id, {error: 'Invalid key'});
+          return;
+        }
+
+        result = localStorage.getItem(key);
+        this.respond(source, id, {value: result});
+      };
+
+      // Handle set request
+      CrossStorageHub.prototype.handleSet = function(source, id, args) {
+        var key, value;
+
+        if (args.length < 2) {
+          this.respond(source, id, {error: 'Missing key and/or value'});
+          return;
+        }
+
+        key = args[0];
+        value = args[1];
+        
+        if (typeof key !== 'string') {
+          this.respond(source, id, {error: 'Invalid key'});
+          return;
+        }
+
+        localStorage.setItem(key, value);
+        this.respond(source, id, {success: true});
+      };
+
+      // Handle del request
+      CrossStorageHub.prototype.handleDel = function(source, id, args) {
+        var key;
+
+        if (!args.length) {
+          this.respond(source, id, {error: 'Missing key'});
+          return;
+        }
+
+        key = args[0];
+        if (typeof key !== 'string') {
+          this.respond(source, id, {error: 'Invalid key'});
+          return;
+        }
+
+        localStorage.removeItem(key);
+        this.respond(source, id, {success: true});
+      };
+
+      // Handle clear request
+      CrossStorageHub.prototype.handleClear = function(source, id, args) {
+        localStorage.clear();
+        this.respond(source, id, {success: true});
+      };
+
+      // Handle getKeys request
+      CrossStorageHub.prototype.handleGetKeys = function(source, id, args) {
+        var keys, i;
+        
+        keys = [];
+        for (i = 0; i < localStorage.length; i++) {
+          keys.push(localStorage.key(i));
+        }
+
+        this.respond(source, id, {value: keys});
+      };
+
+      // Initialize hub with permissions
+      function init(permissions) {
+        var hub = new CrossStorageHub(permissions);
+        
+        // Listen for messages
+        window.addEventListener('message', function(e) {
+          hub.handleMessage(e);
+        }, false);
+      }
+
+      // Configure permissions - IMPORTANT: update these origins to match your actual domains
+      init([
+        {
+          origin: /^https?:\/\/(.*\.)?mgexpo\.ma$/,
+          methods: ['get', 'set', 'del', 'clear', 'getKeys']
+        },
+        {
+          origin: /^(https?:\/\/localhost)(:\d+)?$/,
+          methods: ['get', 'set', 'del', 'clear', 'getKeys']
+        },
+        // Add your Next.js domain here
+        {
+          origin: /^https?:\/\/(.*\.)?your-nextjs-domain\.com$/,
+          methods: ['get', 'set', 'del', 'clear', 'getKeys']
+        }
+        // You can add more domains as needed
+      ]);
+
+      console.log('Cross-storage hub initialized');
+    })(window);
+  </script>
+</body>
+</html>
