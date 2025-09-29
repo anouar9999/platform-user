@@ -21,97 +21,104 @@ const ServerMessage = ({ type, message, onClose, duration = 5000 }) => {
       border: 'border-green-500/20',
       text: 'text-green-400',
       icon: <CheckCircle className="w-5 h-5 text-green-400" />,
+      ring: 'focus:ring-green-500/50',
+      progressBg: 'bg-green-400/30',
     },
     error: {
       bg: 'bg-gradient-to-r from-red-500/10 to-red-600/10',
       border: 'border-red-500/20',
       text: 'text-red-400',
       icon: <XCircle className="w-5 h-5 text-red-400" />,
+      ring: 'focus:ring-red-500/50',
+      progressBg: 'bg-red-400/30',
     },
   };
 
-  const currentStyle = styles[type];
+  const currentStyle = styles[type] || styles.error;
 
   return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4 pointer-events-none">
+<div className="fixed top-4 right-4 z-50 w-full max-w-md px-4 pointer-events-none">
       <AnimatePresence mode="wait">
-        <motion.div
-          key={message}
-          initial={{ opacity: 0, y: -20, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -20, scale: 0.95 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-          className={`
-            relative
-            overflow-hidden
-            backdrop-blur-sm
-            rounded-xl
-            border
-            ${currentStyle.bg}
-            ${currentStyle.border}
-            ${currentStyle.text}
-            p-4
-            pr-12
-            shadow-lg
-            flex
-            items-center
-            gap-3
-            w-full
-            pointer-events-auto
-          `}
-        >
-          {/* Background pulse effect */}
+        {message && (
           <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 0.5 }}
-            transition={{ duration: 0.3 }}
-            className={`absolute inset-0 ${currentStyle.bg} filter blur-xl`}
-          />
-
-          {/* Content */}
-          <div className="flex items-center gap-3 relative z-10">
-            {currentStyle.icon}
-            <span className="text-sm font-medium">{message}</span>
-          </div>
-
-          {/* Close button */}
-          <button
-            onClick={onClose}
+            key={message}
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
             className={`
-              absolute 
-              right-4 
-              top-1/2 
-              -translate-y-1/2
+              relative
+              overflow-hidden
+              backdrop-blur-sm
+              rounded-xl
+              border
+              ${currentStyle.bg}
+              ${currentStyle.border}
               ${currentStyle.text}
-              hover:opacity-70
-              focus:outline-none
-              focus:ring-2
-              focus:ring-offset-2
-              focus:ring-offset-gray-800
-              focus:ring-${type === 'success' ? 'green' : 'red'}-500/50
-              transition-all
-              duration-200
-              rounded-full
-              p-1
+              p-4
+              pr-12
+              shadow-lg
+              flex
+              items-center
+              gap-3
+              w-full
+              pointer-events-auto
             `}
           >
-            <X className="w-4 h-4" />
-          </button>
+            {/* Background pulse effect */}
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 0.5 }}
+              transition={{ duration: 0.3 }}
+              className={`absolute inset-0 ${currentStyle.bg} filter blur-xl`}
+            />
 
-          {/* Progress bar */}
-          <motion.div
-            initial={{ width: '100%' }}
-            animate={{ width: '0%' }}
-            transition={{ duration: duration / 1000, ease: 'linear' }}
-            className={`
-              absolute
-              bottom-0
-              left-0
-              h-0.5
-              ${type === 'success' ? 'bg-green-400/30' : 'bg-red-400/30'}
-            `}
-          />
-        </motion.div>
+            {/* Content */}
+            <div className="flex items-center gap-3 relative z-10">
+              {currentStyle.icon}
+              <span className="text-sm font-medium">{message}</span>
+            </div>
+
+            {/* Close button */}
+            <button
+              onClick={onClose}
+              className={`
+                absolute 
+                right-4 
+                top-1/2 
+                -translate-y-1/2
+                ${currentStyle.text}
+                hover:opacity-70
+                focus:outline-none
+                focus:ring-2
+                focus:ring-offset-2
+                focus:ring-offset-gray-800
+                ${currentStyle.ring}
+                transition-all
+                duration-200
+                rounded-full
+                p-1
+              `}
+              aria-label="Close notification"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Progress bar */}
+            <motion.div
+              initial={{ width: '100%' }}
+              animate={{ width: '0%' }}
+              transition={{ duration: duration / 1000, ease: 'linear' }}
+              className={`
+                absolute
+                bottom-0
+                left-0
+                h-0.5
+                ${currentStyle.progressBg}
+              `}
+            />
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );
