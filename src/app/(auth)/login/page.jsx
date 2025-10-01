@@ -530,7 +530,7 @@ const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
       // Redirect to Vite app
       setTimeout(() => {
 
-        window.location.href = `${process.env.NEXT_PUBLIC_FRONTEND_URL}:3000/choose-to`; // ✅ Redirect to your Vite app
+        window.location.href = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/choose-to`; // ✅ Redirect to your Vite app
         try {
           logStep('LOGIN_REDIRECT_EXECUTED');
         } catch (redirectError) {

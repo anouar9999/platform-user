@@ -180,7 +180,7 @@ const ProfileDropdown = () => {
       if (window.location.hostname === 'localhost') {
         window.location.href = `http://localhost:5173/${noCache}`;
       } else {
-        window.location.href = `https://your-vite-app.com/${noCache}`;
+        window.location.href = `https://gnews.ma/${noCache}`;
       }
     } catch (error) {
       console.error("❌ Frontend cleanup failed:", error);

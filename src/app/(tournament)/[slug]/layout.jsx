@@ -71,8 +71,11 @@ const LayoutContent = ({ children }) => {
 
   const joinTournament = async (teamId = null) => {
     setIsJoining(true);
-    const userId = localStorage.getItem('userId');
+ const userDataString = localStorage.getItem("authData");
+const userData = JSON.parse(userDataString);
 
+    const userId = userData?.userId ;
+	console.log(userId)
     try {
       if (!userId) {
         addToast({

@@ -24,7 +24,10 @@ export const TournamentProvider = ({ children }) => {
 
   const checkJoinStatus = useCallback(async (tournamentId) => {
     try {
-      const userId = localStorage.getItem('userId');
+   const userDataString = localStorage.getItem("authData");
+const userData = JSON.parse(userDataString);
+
+    const userId = userData?.userId ;
       if (!userId) {
         setLoading(false);
         return;
