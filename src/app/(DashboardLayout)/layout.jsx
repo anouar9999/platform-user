@@ -71,14 +71,14 @@ const Layout = ({ children }) => {
       <div className="fixed top-0 left-0 right-0 h-screen w-full z-0">
         {/* Background Image */}
         <div className="absolute inset-0">
-          <Image
+          {/* <Image
             src="https://curry.gg/images/bg_left.webp"
             alt="Background"
             fill
             style={{ objectFit: 'cover' }}
             priority
             className="object-center"
-          />
+          /> */}
         </div>
 
         {/* Dark Overlay with Gradient */}
@@ -90,9 +90,9 @@ const Layout = ({ children }) => {
         <Header setIsMobileOpen={setIsMobileOpen} />
         <div className="flex flex-1">
           <Sidebar isMobileOpen={isMobileOpen} setIsMobileOpen={setIsMobileOpen} />
-          <main className="font-pilot flex-1 flex flex-col mt-8 mb-4">
-            <div className="sm:pl-16 md:pl-18">{children}</div>
-          </main>
+            <main className="font-pilot flex-1 flex flex-col mt-8 mb-4">
+              <div className="sm:pl-16 md:pl-18">{children}</div>
+            </main>
         </div>
       </div>
 

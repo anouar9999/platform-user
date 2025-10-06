@@ -3,26 +3,117 @@ import axios from 'axios';
 import { HelpCircle, Trophy, Shield, UserCircle, Users, PlusCircle } from 'lucide-react';
 import Image from 'next/image';
 
+// ============================================
+// MOCK DATA - Set to true to use mock data
+// ============================================
+const USE_MOCK_DATA = true;
+
+const MOCK_PARTICIPANTS = [
+  {
+    registration_id: 1,
+    type: 'player',
+    username: 'ShadowStrike',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop',
+  },
+  {
+    registration_id: 2,
+    type: 'team',
+    team_name: 'Cyber Warriors',
+    team_avatar: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=150&h=150&fit=crop',
+    division: 'Gold 3',
+    total_members: 5,
+  },
+  {
+    registration_id: 3,
+    type: 'player',
+    username: 'NightHawk',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop',
+  },
+  {
+    registration_id: 4,
+    type: 'team',
+    team_name: 'Phoenix Squad',
+    team_avatar: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=150&h=150&fit=crop',
+    division: 'Platinum 2',
+    total_members: 6,
+  },
+  {
+    registration_id: 5,
+    type: 'player',
+    username: 'VortexGaming',
+    avatar: null, // Test default avatar
+  },
+  {
+    registration_id: 6,
+    type: 'team',
+    team_name: 'Elite Forces',
+    team_avatar: null, // Test default avatar
+    division: 'Diamond 1',
+    total_members: 4,
+  },
+  {
+    registration_id: 7,
+    type: 'player',
+    username: 'ThunderBolt',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop',
+  },
+  {
+    registration_id: 8,
+    type: 'team',
+    team_name: 'Iron Legends',
+    team_avatar:
+      'https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=150&h=150&fit=crop',
+    division: 'Silver 2',
+    total_members: 7,
+  },
+  {
+    registration_id: 9,
+    type: 'player',
+    username: 'BlazeFury',
+    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop',
+  },
+  {
+    registration_id: 10,
+    type: 'team',
+    team_name: 'Dark Stalkers',
+    team_avatar:
+      'https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=150&h=150&fit=crop',
+    division: 'Master',
+    total_members: 8,
+  },
+];
+// ============================================
+
 const DefaultAvatar = ({ isTeam }) => (
-  <div className="relative w-full h-full bg-gradient-to-br from-gray-800 to-gray-700 flex items-center justify-center">
-    <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-100 via-gray-900 to-gray-900" />
-    {isTeam ? (
-      <Shield
-        className="w-6 h-6 xs:w-8 xs:h-8 md:w-10 md:h-10 text-gray-400 relative z-10"
-        strokeWidth={1.5}
-      />
-    ) : (
-      <UserCircle
-        className="w-6 h-6 xs:w-8 xs:h-8 md:w-10 md:h-10 text-gray-400 relative z-10"
-        strokeWidth={1.5}
-      />
-    )}
-    <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-gray-800 via-gray-800/50 to-transparent" />
+  <div className="relative w-full h-full bg-black/60">
+    {/* Scanline effect */}
+    <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,61,8,0.03)_2px,rgba(255,61,8,0.03)_4px)]" />
+
+    {/* Grid pattern */}
+    <div
+      className="absolute inset-0 opacity-10"
+      style={{
+        backgroundImage:
+          'linear-gradient(rgba(255,61,8,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,61,8,0.3) 1px, transparent 1px)',
+        backgroundSize: '20px 20px',
+      }}
+    />
+
+    {/* Icon */}
+    <div className="absolute inset-0 flex items-center justify-center">
+      {isTeam ? (
+        <Shield className="w-8 h-8 md:w-12 md:h-12 text-primary/50" strokeWidth={1.5} />
+      ) : (
+        <UserCircle className="w-8 h-8 md:w-12 md:h-12 text-primary/50" strokeWidth={1.5} />
+      )}
+    </div>
+
+    {/* Bottom gradient */}
+    <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black to-transparent" />
   </div>
 );
 
 const ParticipantOrTeamCard = ({ item }) => {
-  console.log(item)
   const isTeam = item.type === 'team';
   const isCurrentUser = !isTeam && localStorage.getItem('username') === item.username;
   const avatarSrc = isTeam
@@ -30,22 +121,33 @@ const ParticipantOrTeamCard = ({ item }) => {
     : item.avatar;
 
   return (
-    <div
-      className="group relative bg-dark/80 overflow-hidden rounded-lg border border-gray-800/50
-      hover:border-primary/30 transition-all duration-300 h-full transform hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10"
-    >
-      {/* Animated glow effect on hover */}
-      <div className="absolute -inset-1 bg-gradient-to-r from-primary/0 via-primary/30 to-primary/0 
-        opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-1000 group-hover:animate-glow"></div>
-      
-      {/* Card content with improved styling */}
-      <div className="relative z-10">
-        {/* Avatar section with better gradient overlay */}
-        <div className="relative h-16 xs:h-20 sm:h-24 overflow-hidden">
-          {avatarSrc ? (
+    <div className="group relative">
+      {/* Corner accents */}
+      <div className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20"></div>
+      <div className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20"></div>
+
+      {/* Main card */}
+      <div className="relative bg-black/40 border border-white/10 group-hover:border-primary/50 overflow-hidden transition-all duration-300 h-full">
+        {/* Top accent line */}
+        <div className="h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+        {/* Scanline overlay */}
+        <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,61,8,0.02)_2px,rgba(255,61,8,0.02)_4px)] opacity-50 pointer-events-none"></div>
+
+        {/* Avatar section */}
+        <div className="relative h-20 sm:h-24 md:h-28 overflow-hidden">
+          {avatarSrc && !USE_MOCK_DATA ? (
             <img
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${avatarSrc}`}
+              className="w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-500"
+              src={avatarSrc}
+              alt={`${isTeam ? item.team_name : item.username}'s avatar`}
+              width={192}
+              height={128}
+            />
+          ) : avatarSrc && USE_MOCK_DATA && avatarSrc !== null ? (
+            <img
+              className="w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-500"
+              src={avatarSrc}
               alt={`${isTeam ? item.team_name : item.username}'s avatar`}
               width={192}
               height={128}
@@ -53,53 +155,37 @@ const ParticipantOrTeamCard = ({ item }) => {
           ) : (
             <DefaultAvatar isTeam={isTeam} />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/70 to-transparent" />
-          
-          {/* Status indicator for current user */}
+
+          {/* Vignette effect */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle,transparent_30%,rgba(0,0,0,0.8))]" />
+
+          {/* Current user badge */}
           {isCurrentUser && (
-            <div className="absolute top-2 right-2 bg-primary/80 text-white text-xs px-2 py-0.5 rounded-full backdrop-blur-sm">
-              You
+            <div className="absolute top-2 right-2 z-10">
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary blur-sm"></div>
+                <div className="relative bg-primary text-black text-xs font-bold px-3 py-1 transform -skew-x-6 border border-primary/50">
+                  <span className="transform skew-x-6 block">YOU</span>
+                </div>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Content section with improved typography and spacing */}
-        <div className="p-3 xs:p-3.5 sm:p-4">
-          <div className="flex items-center justify-between mb-2">
-            <h5 className="text-sm xs:text-base sm:text-lg font-valorant text-white truncate">
+        {/* Content section */}
+        <div className="relative ">
+          {/* Name with side accent */}
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-1 h-5 bg-primary"></div>
+            <h5 className="text-sm sm:text-base md:text-xl font-zentry text-white truncate uppercase tracking-wide">
               {isTeam ? item.team_name : item.username}
             </h5>
           </div>
 
-          {/* Team-specific content with improved layout */}
-          {isTeam ? (
-            <div className="mt-2">
-              <div className="flex items-center justify-between gap-2">
-                {/* Division badge with improved styling */}
-                <div className="flex items-center gap-2 bg-gray-800/50 rounded-md px-2 py-1 backdrop-blur-sm">
-                  <img
-                    className="w-6 h-6 object-contain"
-                    src="https://curry.gg/uploads/703/64q9D5Bw2mASHeqoTlvoglqW7P7p1G-metaR29sZCAzLnBuZw==-.png"
-                  />
-                  <span className="text-xs font-pilot text-gray-300">{item.division || 'N/A'}</span>
-                </div>
-                
-                {/* Players count with improved styling */}
-                <div className="flex items-center gap-2 bg-gray-800/50 rounded-md px-2 py-1 backdrop-blur-sm">
-                  <Users className="w-4 h-4 text-primary" />
-                  <span className="text-xs font-pilot text-gray-300">{item.total_members || '0'} Players</span>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="mt-2 flex items-center text-xs text-gray-400">
-              <div className="flex items-center gap-1.5">
-                <Trophy className="w-3.5 h-3.5 text-primary" />
-                <span className="font-pilot">Player</span>
-              </div>
-            </div>
-          )}
+          {/* Team-specific content */}
         </div>
+
+        {/* Bottom accent line */}
       </div>
     </div>
   );
@@ -113,6 +199,17 @@ const ParticipantCardGrid = ({ tournamentId }) => {
 
   useEffect(() => {
     const fetchParticipants = async () => {
+      // Use mock data if enabled
+      if (USE_MOCK_DATA) {
+        setTimeout(() => {
+          setParticipants(MOCK_PARTICIPANTS);
+          setTournamentType('mixed');
+          setLoading(false);
+        }, 1000); // Simulate API delay
+        return;
+      }
+
+      // Real API call
       try {
         setLoading(true);
         const response = await axios.get(
@@ -137,42 +234,79 @@ const ParticipantCardGrid = ({ tournamentId }) => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-32 xs:h-40 sm:h-48">
-        <div className="animate-spin rounded-full h-5 w-5 xs:h-6 xs:w-6 sm:h-8 sm:w-8 border-t-2 border-b-2 border-purple-500"></div>
+      <div className="flex justify-center items-center h-48">
+        {/* Loading spinner with tech styling */}
+        <div className="relative w-12 h-12">
+          <div className="absolute inset-0 border-2 border-primary/30 rounded-full"></div>
+          <div className="absolute inset-0 border-2 border-transparent border-t-primary rounded-full animate-spin"></div>
+          <div className="absolute inset-2 border-2 border-primary/20 rounded-full"></div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-red-500 text-center text-xs xs:text-sm sm:text-base p-4">{error}</div>
+      <div className="relative border-l-4 border-red-500 bg-black/40 p-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-red-500/20 border border-red-500/40 flex items-center justify-center transform -skew-x-6">
+            <HelpCircle className="w-5 h-5 text-red-500 transform skew-x-6" />
+          </div>
+          <p className="text-red-400 text-sm font-mono">{error}</p>
+        </div>
+      </div>
     );
   }
 
   if (participants.length === 0) {
     return (
-      <div className="text-center my-8 p-6   max-w-md mx-auto">
-        <div className="relative">
-          <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
-            <Users className="text-primary w-8 h-8" />
+      <div className="relative max-w-md mx-auto my-12">
+        {/* Decorative corners */}
+        <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-primary"></div>
+        <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-primary"></div>
+        <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-primary"></div>
+        <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-primary"></div>
+
+        <div className="bg-black/40 border border-white/10 p-8 text-center">
+          {/* Scanline effect */}
+          <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,61,8,0.02)_2px,rgba(255,61,8,0.02)_4px)] opacity-50"></div>
+
+          <div className="relative z-10">
+            <div className="w-16 h-16 bg-primary/10 border-2 border-primary/30 flex items-center justify-center mx-auto mb-4 transform -skew-x-6">
+              <Users className="text-primary w-8 h-8 transform skew-x-6" />
+            </div>
+
+            <h3 className="text-xl font-valorant text-white mb-3 uppercase tracking-wider">
+              No Participants Yet
+            </h3>
+
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <div className="h-px w-8 bg-primary"></div>
+              <div className="h-1 w-1 bg-primary transform rotate-45"></div>
+              <div className="h-px w-8 bg-primary"></div>
+            </div>
+
+            <p className="text-gray-400 font-mono text-sm uppercase tracking-wide">
+              Be the first to join
+            </p>
           </div>
         </div>
-
-        <h3 className="text-lg font-valorant text-white mb-2">No Participants Registered</h3>
-
-        <p className="text-gray-400 mb-6 font-mono">
-          Join the competition and showcase your skills!
-        </p>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto px-2 xs:px-3 sm:px-4">
-      <div
-        className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 
-        gap-2 xs:gap-3 sm:gap-4"
-      >
+    <div className="mx-auto px-2 sm:px-4">
+      {/* Mock data indicator */}
+      {USE_MOCK_DATA && (
+        <div className="mb-4 bg-yellow-500/10 border border-yellow-500/30 p-3 text-center">
+          <p className="text-yellow-500 text-sm font-mono uppercase tracking-wider">
+            ⚠ Using Mock Data - Set USE_MOCK_DATA to false for real data
+          </p>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
         {participants.map((item) => (
           <ParticipantOrTeamCard key={`participant-${item.registration_id}`} item={item} />
         ))}

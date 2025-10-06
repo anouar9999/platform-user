@@ -20,6 +20,8 @@ import { useToast } from '@/app/components/toast/ToastProviderContext';
 import TeamSelectionDialog from './TeamSelectionDialog';
 import axios from 'axios';
 import { useRouter } from 'next/navigation'; // Add this import for navigation
+import TournamentJoinButton from './TournamentJoinButton';
+import TournamentStats from './TournamentStats';
 
 // Loading Component
 
@@ -510,7 +512,7 @@ const userData = JSON.parse(userDataString);
           {tournament && (
             <div className="relative w-full h-full">
               <img
-                src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${tournament.featured_image}`}
+                src={`https://framerusercontent.com/images/t7ZowO33lGwkXjvFtZPiTbxFwc.jpg?scale-down-to=1024`}
                 alt="Tournament Background"
                 className="w-full h-full object-cover absolute inset-0"
               />
@@ -536,24 +538,35 @@ const userData = JSON.parse(userDataString);
             {tournament && (
               <>
                 <div className="flex flex-col lg:flex-row justify-between items-start gap-6">
-                  <h2 className=" flex-col text-4xl sm:text-5xl font-custom text-white mb-4">
+                  <h2 className=" flex-col text-5xl sm:text-6xl font-zentry text-white mb-4">
                    <span>{tournament.name}</span> 
-                   <p className='text-sm font-mono w-2/3 pt-4 text-gray-400'>{tournament.description}</p>
+                   <p className='text-sm font-circular-web w-2/3 pt-4 text-gray-400'>
+                   {/* {tournament.description} */}
+                   Lorem, ipsum dolor sit amet consectetur adipisicing elit. Molestiae soluta incidunt ipsa ad doloremque nostrum eligendi fuga? Suscipit, nostrum, obcaecati voluptates cumque maxime dolorum, id dicta facere quam hic quidem?
+                   </p>
                   </h2>
-                  {renderJoinButton()}
+              <TournamentJoinButton
+  tournament={tournament}
+  hasJoined={hasJoined}
+  registrationStatus={registrationStatus}
+  teamName={teamName}
+  onJoinClick={handleJoinClick}
+/>
                 </div>
-                {renderTournamentStats()}
               </>
             )}
           </div>
         </div>
 
         {/* Main Content - Centered on X axis */}
-        <main className="flex-1 flex flex-col items-center mt-4 z-30 mb-2 px-4 sm:px-8 md:px-16">
-          <div className="w-full max-w-9xl mx-auto">
-            {children}
-          </div>
-        </main>
+      <main className="flex-1 flex flex-col items-center mt-4 z-30 mb-2 ">
+  <div className="w-full  mx-auto flex gap-4">
+    <div className="w-[100%]">
+        {children}
+    </div>
+   
+  </div>
+</main>
 
         <TeamSelectionDialog
           isOpen={showTeamDialog}

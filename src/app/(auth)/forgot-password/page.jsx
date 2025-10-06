@@ -107,7 +107,7 @@ export default function ForgotPasswordForm() {
 
   return (
     <div
-      className="relative min-h-screen flex flex-col items-center justify-center bg-black"
+      className="relative min-h-screen flex flex-col items-center justify-center bg-black font-circular-web"
       style={{
         backgroundImage:
           'url(https://lolstatic-a.akamaihd.net/rso-authenticator-ui/0.87.4/assets/riot_desktop_background_2x.jpg)',
@@ -115,33 +115,11 @@ export default function ForgotPasswordForm() {
         backgroundPosition: 'center',
       }}
     >
-      <div className="absolute inset-0 bg-gradient-to-t from-transparent to-secondary/80"></div>
-
-      {/* Inject animated gradient CSS */}
-      <style dangerouslySetInnerHTML={{ __html: animatedGradientStyle }} />
-
-      {/* Logo positioned at the top */}
-      <div className=" w-36 z-50 overflow-hidden">
-        <img
-          src="/images/logo-gamius-white.png"
-          alt="Gamius Logo"
-          className="w-full h-full object-cover"
-        />
-      </div>
-
-      {/* Auth modal - centered with fixed width */}
-      <motion.div
-        className="relative w-full max-w-md mx-auto bg-secondary shadow-2xl overflow-hidden z-10 border border-gray-800/50"
-        initial={{ y: 30, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
-      >
-        <div className="p-8">
-          {/* Server Message Display */}
+       {/* Server Message Display */}
           <AnimatePresence>
             {serverMessage.message && (
               <motion.div
-                className={`mb-6 p-4 rounded-lg ${
+                className={`mb-6 p-4 z-50 rounded-lg ${
                   serverMessage.type === 'error'
                     ? 'bg-red-900/40 text-red-200 border border-red-700/50'
                     : 'bg-green-900/40 text-green-200 border border-green-700/50'
@@ -168,6 +146,29 @@ export default function ForgotPasswordForm() {
               </motion.div>
             )}
           </AnimatePresence>
+      <div className="absolute inset-0 bg-gradient-to-t from-transparent to-secondary/80"></div>
+
+      {/* Inject animated gradient CSS */}
+      <style dangerouslySetInnerHTML={{ __html: animatedGradientStyle }} />
+
+      {/* Logo positioned at the top */}
+      <div className=" w-36 my-5 z-50 overflow-hidden">
+        <img
+          src="/images/logo-gamius-white.png"
+          alt="Gamius Logo"
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      {/* Auth modal - centered with fixed width */}
+      <motion.div
+        className="relative w-full max-w-md mx-auto bg-secondary shadow-2xl overflow-hidden z-10 border border-gray-800/50"
+        initial={{ y: 30, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+      >
+        <div className="p-8">
+         
 
           <Formik
             initialValues={initialValues}
@@ -184,8 +185,8 @@ export default function ForgotPasswordForm() {
                 >
                   {/* Title */}
                   <motion.div variants={formItemVariants} className="text-center mb-8">
-                    <h2 className="text-2xl font-ea-football text-white">Forgot Password</h2>
-                    <p className="text-gray-400 font-pilot mt-2">
+                    <h2 className="text-2xl font-zentry text-white">Forgot Password</h2>
+                    <p className="text-gray-400 font-circular-web mt-2">
                       Enter your email to receive a password reset link
                     </p>
                   </motion.div>
@@ -213,7 +214,7 @@ export default function ForgotPasswordForm() {
                   <motion.div variants={formItemVariants} className="mt-8">
                     <button
                       type="submit"
-                      className="w-full bg-orange-500 text-white py-3 font-pilot uppercase rounded-md
+                      className="w-full bg-orange-500 text-white py-3 font-zentry text-lg uppercase rounded-md
                         hover:bg-orange-600 transition-colors
                         disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
                       disabled={isLoading}

@@ -10,13 +10,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-      'primary': '#334155',
+      'primary': '#FF8000',
         'orange-mge':'#ff3d08',
         'secondary':'#181818',
         'dark':'#1f2020',
         'dark-gray':'#5E656D',
       },
       fontFamily: {
+        "circular-web": ["circular-web", "sans-serif"],
+        zentry: ['zentry', 'sans-serif'],
         "ea-football": ['ea-football', 'sans-serif'],
         "street-fighter": ['street-fighter', 'sans-serif'],
         "free-fire": ['free-fire', 'sans-serif'],
