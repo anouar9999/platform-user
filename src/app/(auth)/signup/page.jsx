@@ -430,7 +430,7 @@ const onSubmit = async (data) => {
                             className="w-5 h-5 mt-0.5 bg-gray-800 border-gray-600 rounded text-orange-500 focus:ring-orange-500 flex-shrink-0"
                           />
                           <span className="text-sm text-gray-300 group-hover:text-white transition-colors">
-                            Oui ; Riot peut m'envoyer des informations concernant les nouvelles
+                            Oui ; Riot peut m envoyer des informations concernant les nouvelles
                             sorties, les mises à jour du jeu, les événements ou tout autre contenu
                             Riot.
                           </span>
@@ -526,7 +526,7 @@ const onSubmit = async (data) => {
                       className="text-center mb-6"
                     >
                       <h2 className="text-4xl md:text-5xl font-zentry tracking-wide text-white">
-                        Choisissez un nom d'utilisateur
+                        Choisissez un nom d utilisateur
                       </h2>
                       <p className="text-gray-400 mt-2">
                         Utilisé pour vous connecter à tous nos jeux.

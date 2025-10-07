@@ -1,4 +1,4 @@
-import { Users } from "lucide-react";
+import { UserCircle, Users } from "lucide-react";
 
 const TeamCard = ({ team, onClick, isInMyTeams }) => {
   const memberCount = team.members?.length || 0;

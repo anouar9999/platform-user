@@ -376,7 +376,7 @@ export default function LoginPage() {
               {/* Sign Up Link */}
               <motion.div variants={formItemVariants} className="mt-8 text-center">
                 <p className="text-gray-400 text-sm mb-2">
-                  Tu n'as pas de compte ?
+                  Tu n as pas de compte ?
                 </p>
                 <a
                   href="/signup"

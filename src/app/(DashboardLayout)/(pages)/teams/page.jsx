@@ -525,7 +525,7 @@ const TeamHub = () => {
 
           {filteredTeams.my.length === 0 && !searchTerm && (
             <div className="text-center py-8 text-gray-400">
-              <p className="text-sm sm:text-base">You haven't joined any teams yet.</p>
+              <p className="text-sm sm:text-base">You haven t joined any teams yet.</p>
               <p className="mt-2 text-xs sm:text-sm">Create a team or join an existing one to get started.</p>
             </div>
           )}
