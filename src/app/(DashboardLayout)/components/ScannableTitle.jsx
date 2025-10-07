@@ -1,7 +1,7 @@
 const ScannableTitle = ({ primaryText, secondaryText, className = "" }) => {
   return (
     <div className="relative inline-block">
-      <h1 className={`text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight font-zentry special-font ${className}`}>
+      <h1 className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight font-zentry special-font ${className}`}>
         {primaryText && (
           <>
             <span className="relative inline-block text-white">
@@ -12,9 +12,9 @@ const ScannableTitle = ({ primaryText, secondaryText, className = "" }) => {
         )}
         
         {/* Secondary text with special effects */}
-        <span className="relative inline-block group">
+        <span className="relative inline-block group mt-1 sm:mt-0">
           {/* Glowing background */}
-          <span className="absolute inset-0 bg-gradient-to-r from-orange-500/20 via-orange-400/20 to-orange-500/20 blur-2xl animate-pulse"></span>
+          <span className="absolute inset-0 bg-gradient-to-r from-orange-500/20 via-orange-400/20 to-orange-500/20 blur-xl sm:blur-2xl animate-pulse"></span>
           
           {/* Main text with gradient */}
           <span className="relative bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
@@ -27,16 +27,16 @@ const ScannableTitle = ({ primaryText, secondaryText, className = "" }) => {
           {/* Animated scan beam */}
           <span className="absolute inset-0 bg-gradient-to-b from-transparent via-white/30 to-transparent h-full w-full opacity-0 animate-scan pointer-events-none"></span>
           
-          {/* Glitch lines */}
-          <span className="absolute left-0 top-1/4 w-full h-px bg-orange-500/50 animate-glitch-1"></span>
-          <span className="absolute left-0 top-2/4 w-full h-px bg-orange-400/50 animate-glitch-2"></span>
-          <span className="absolute left-0 top-3/4 w-full h-px bg-orange-500/50 animate-glitch-3"></span>
+          {/* Glitch lines - hidden on mobile for performance */}
+          <span className="hidden sm:block absolute left-0 top-1/4 w-full h-px bg-orange-500/50 animate-glitch-1"></span>
+          <span className="hidden sm:block absolute left-0 top-2/4 w-full h-px bg-orange-400/50 animate-glitch-2"></span>
+          <span className="hidden sm:block absolute left-0 top-3/4 w-full h-px bg-orange-500/50 animate-glitch-3"></span>
           
-          {/* Corner brackets */}
-          <span className="absolute -left-2 -top-1 w-4 h-4 border-t-2 border-l-2 border-orange-500 opacity-70"></span>
-          <span className="absolute -right-2 -top-1 w-4 h-4 border-t-2 border-r-2 border-orange-500 opacity-70"></span>
-          <span className="absolute -left-2 -bottom-1 w-4 h-4 border-b-2 border-l-2 border-orange-500 opacity-70"></span>
-          <span className="absolute -right-2 -bottom-1 w-4 h-4 border-b-2 border-r-2 border-orange-500 opacity-70"></span>
+          {/* Corner brackets - scaled for mobile */}
+          <span className="absolute -left-1 sm:-left-2 -top-0.5 sm:-top-1 w-2 h-2 sm:w-3 sm:h-3 md:w-4 md:h-4 border-t-2 border-l-2 border-orange-500 opacity-70"></span>
+          <span className="absolute -right-1 sm:-right-2 -top-0.5 sm:-top-1 w-2 h-2 sm:w-3 sm:h-3 md:w-4 md:h-4 border-t-2 border-r-2 border-orange-500 opacity-70"></span>
+          <span className="absolute -left-1 sm:-left-2 -bottom-0.5 sm:-bottom-1 w-2 h-2 sm:w-3 sm:h-3 md:w-4 md:h-4 border-b-2 border-l-2 border-orange-500 opacity-70"></span>
+          <span className="absolute -right-1 sm:-right-2 -bottom-0.5 sm:-bottom-1 w-2 h-2 sm:w-3 sm:h-3 md:w-4 md:h-4 border-b-2 border-r-2 border-orange-500 opacity-70"></span>
           
           {/* Digital noise effect */}
           <span className="absolute inset-0 opacity-5 mix-blend-overlay pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxwYXRoIGQ9Ik0wIDBoMzAwdjMwMEgweiIgZmlsdGVyPSJ1cmwoI2EpIiBvcGFjaXR5PSIuMDUiLz48L3N2Zz4=')]"></span>

@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Backpack, ChevronDown, Home, LogOut } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { TbDoorEnter } from 'react-icons/tb';
+import { Backpack, ChevronDown, LogOut } from 'lucide-react';
 
 const ProfileDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,7 +11,6 @@ const ProfileDropdown = () => {
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const router = useRouter();
   const dropdownRef = useRef(null);
 
   const getInitials = (name) => {
@@ -92,18 +89,14 @@ const ProfileDropdown = () => {
             timestamp: new Date().getTime()
           };
           localStorage.setItem('authData', JSON.stringify(authDataForStorage));
-          
-          console.log('✅ Auth check successful:', data.user);
         } else {
           setIsAuthenticated(false);
           clearUserData();
         }
       } else if (response.status === 401) {
-        console.log('❌ Not authenticated - session expired or invalid');
         setIsAuthenticated(false);
         clearUserData();
       } else {
-        console.error('Auth check failed with status:', response.status);
         setIsAuthenticated(false);
         clearUserData();
       }
@@ -128,7 +121,6 @@ const ProfileDropdown = () => {
   };
 
   const handleSignOut = async () => {
-    console.log("Starting session-based sign out process...");
     setIsLoading(true);
     
     try {
@@ -139,15 +131,8 @@ const ProfileDropdown = () => {
           'Content-Type': 'application/json',
         },
       });
-
-      if (response.ok) {
-        console.log("✅ Backend session cleared successfully");
-      } else {
-        console.log("⚠️ Backend logout failed, but continuing with frontend cleanup");
-      }
     } catch (error) {
-      console.error("❌ Backend logout error:", error);
-      console.log("Continuing with frontend cleanup...");
+      console.error("Backend logout error:", error);
     }
 
     try {
@@ -157,8 +142,6 @@ const ProfileDropdown = () => {
       setIsAuthenticated(false);
       setIsOpen(false);
       
-      console.log("✅ Frontend cleanup completed");
-      
       const noCache = `?nocache=${Date.now()}`;
       if (window.location.hostname === 'localhost') {
         window.location.href = `http://localhost:5173/${noCache}`;
@@ -166,7 +149,7 @@ const ProfileDropdown = () => {
         window.location.href = `https://gnews.ma/${noCache}`;
       }
     } catch (error) {
-      console.error("❌ Frontend cleanup failed:", error);
+      console.error("Frontend cleanup failed:", error);
       window.location.reload();
     }
   };
@@ -186,11 +169,17 @@ const ProfileDropdown = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center space-x-3 py-2.5 px-4 min-w-[180px]">
-        <div className="w-9 h-9 bg-primary/20 border border-primary/40 animate-pulse transform -skew-x-6"></div>
-        <div className="flex-1 space-y-2">
-          <div className="h-3 bg-primary/20 animate-pulse w-20"></div>
-          <div className="h-2 bg-primary/10 animate-pulse w-16"></div>
+      <div className="flex items-center">
+        {/* Mobile loading - just avatar */}
+        <div className="md:hidden w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-primary/20 border-2 border-primary/40 animate-pulse" />
+        
+        {/* Desktop loading - full button */}
+        <div className="hidden md:flex items-center space-x-3 py-2.5 px-4 min-w-[180px]">
+          <div className="w-9 h-9 bg-primary/20 border border-primary/40 animate-pulse transform -skew-x-6"></div>
+          <div className="flex-1 space-y-2">
+            <div className="h-3 bg-primary/20 animate-pulse w-20"></div>
+            <div className="h-2 bg-primary/10 animate-pulse w-16"></div>
+          </div>
         </div>
       </div>
     );
@@ -206,63 +195,83 @@ const ProfileDropdown = () => {
   return (
     <div ref={dropdownRef} className="relative inline-block text-left">
       <button
-        className="group relative flex items-center space-x-3 py-2.5 px-4 min-w-[200px] sm:min-w-[180px] transition-all duration-300"
+        className="group relative flex items-center transition-all duration-300"
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
-        {/* Background with angular styling */}
-        <div className="absolute inset-0 bg-black/40 border border-white/10 group-hover:border-primary/30 transition-all duration-300 overflow-hidden">
-          {/* Scanline effect */}
-          <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,61,8,0.02)_2px,rgba(255,61,8,0.02)_4px)] opacity-50" />
-          
-          {/* Hover accent line */}
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        {/* Mobile: Just rounded avatar */}
+        <div className="md:hidden w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden flex-shrink-0 shadow-lg hover:border-primary hover:scale-105 transition-all duration-300">
+          {avatarUrl && !imageError ? (
+            <img
+              src={
+                avatarUrl.startsWith('http') 
+                  ? avatarUrl 
+                  : `${process.env.NEXT_PUBLIC_BACKEND_URL}${avatarUrl}`
+              }
+              alt={userName}
+              className="w-full h-full object-cover"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className={`w-full h-full ${avatarColor} flex items-center justify-center text-white text-sm font-bold`}>
+              {userInitials}
+            </div>
+          )}
         </div>
 
-        {/* Content */}
-        <div className="relative z-10 flex items-center space-x-3 w-full">
-          {/* Avatar with skewed container */}
-          <div className="relative w-9 h-9 flex-shrink-0 transform -skew-x-6 border border-primary/40 overflow-hidden bg-black/40">
-            <div className="transform skew-x-6 w-full h-full">
-              {avatarUrl && !imageError ? (
-                <img
-                  src={
-                    avatarUrl.startsWith('http') 
-                      ? avatarUrl 
-                      : `${process.env.NEXT_PUBLIC_BACKEND_URL}${avatarUrl}`
-                  }
-                  alt={userName}
-                  className="w-full h-full object-cover"
-                  onError={() => setImageError(true)}
-                />
-              ) : (
-                <div className={`w-full h-full ${avatarColor} flex items-center justify-center text-white text-xs font-bold`}>
-                  {userInitials}
-                </div>
+        {/* Desktop: Full profile button */}
+        <div className="hidden md:flex items-center space-x-3 py-2.5 px-4 min-w-[200px] lg:min-w-[220px]">
+          {/* Background with angular styling */}
+          <div className="absolute inset-0 bg-black/40 border border-white/10 group-hover:border-primary/30 transition-all duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,61,8,0.02)_2px,rgba(255,61,8,0.02)_4px)] opacity-50" />
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </div>
+
+          {/* Content */}
+          <div className="relative z-10 flex items-center space-x-3 w-full">
+            {/* Avatar with skewed container */}
+            <div className="relative w-9 h-9 flex-shrink-0 transform -skew-x-6 border border-primary/40 overflow-hidden bg-black/40">
+              <div className="transform skew-x-6 w-full h-full">
+                {avatarUrl && !imageError ? (
+                  <img
+                    src={
+                      avatarUrl.startsWith('http') 
+                        ? avatarUrl 
+                        : `${process.env.NEXT_PUBLIC_BACKEND_URL}${avatarUrl}`
+                    }
+                    alt={userName}
+                    className="w-full h-full object-cover"
+                    onError={() => setImageError(true)}
+                  />
+                ) : (
+                  <div className={`w-full h-full ${avatarColor} flex items-center justify-center text-white text-xs font-bold`}>
+                    {userInitials}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* User info */}
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-sm font-bold text-white truncate uppercase tracking-wide">
+                {userName}
+              </p>
+              {userType && (
+                <p className="text-xs text-primary truncate capitalize">
+                  {userType}
+                </p>
               )}
             </div>
-          </div>
 
-          {/* User info */}
-          <div className="flex-1 min-w-0 text-left">
-            <p className="text-sm font-bold text-white truncate uppercase tracking-wide">
-              {userName}
-            </p>
-            {userType && (
-              <p className="text-xs text-primary truncate font-ea-football capitalize">
-                {userType}
-              </p>
-            )}
-          </div>
-
-          {/* Chevron with skewed container */}
-          <div className="flex-shrink-0 w-5 h-5 bg-primary/20 border border-primary/40 flex items-center justify-center transform -skew-x-6 group-hover:bg-primary/30 transition-all duration-300">
-            <ChevronDown
-              className={`w-3 h-3 text-primary transition-transform duration-300 transform skew-x-6 ${
-                isOpen ? 'rotate-180' : ''
-              }`}
-            />
+            {/* Chevron */}
+            <div className="flex-shrink-0 w-5 h-5 bg-primary/20 border border-primary/40 flex items-center justify-center transform -skew-x-6 group-hover:bg-primary/30 transition-all duration-300">
+              <ChevronDown
+                className={`w-3 h-3 text-primary transition-transform duration-300 transform skew-x-6 ${
+                  isOpen ? 'rotate-180' : ''
+                }`}
+              />
+            </div>
           </div>
         </div>
       </button>
@@ -274,7 +283,6 @@ const ProfileDropdown = () => {
           <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-primary z-10" />
           
           <div className="relative bg-black/90 backdrop-blur-md border border-white/10 overflow-hidden">
-            {/* Scanline effect */}
             <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,61,8,0.02)_2px,rgba(255,61,8,0.02)_4px)] opacity-50 pointer-events-none" />
             
             <div className="relative z-10 p-4 space-y-4" role="menu">
@@ -282,9 +290,8 @@ const ProfileDropdown = () => {
               <div className="text-center border-b border-white/10 pb-4">
                 <p className="text-white font-bold uppercase tracking-wider mb-1">{userName}</p>
                 {userEmail && (
-                  <p className="text-gray-400 text-xs font-circular-web mb-2">{userEmail}</p>
+                  <p className="text-gray-400 text-xs mb-2">{userEmail}</p>
                 )}
-                {/* Points display with tech styling */}
                 <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 px-3 py-1">
                   <span className="text-primary text-xs font-bold uppercase tracking-wider">
                     {userPoints || 0} Points
@@ -304,7 +311,7 @@ const ProfileDropdown = () => {
                   <div className="w-6 h-6 bg-green-500/20 border border-green-500/40 flex items-center justify-center transform -skew-x-6 group-hover/item:bg-green-500/30 transition-all duration-300">
                     <Backpack className="h-3 w-3 text-green-400 transform skew-x-6" />
                   </div>
-                  <span className="text-gray-300 group-hover/item:text-white font-circular-web font-bold uppercase text-xs tracking-wider">
+                  <span className="text-gray-300 group-hover/item:text-white font-bold uppercase text-xs tracking-wider">
                     Home
                   </span>
                 </div>
@@ -324,7 +331,7 @@ const ProfileDropdown = () => {
                     <div className="w-6 h-6 bg-red-500/20 border border-red-500/40 flex items-center justify-center transform -skew-x-6 group-hover/item:bg-red-500/30 transition-all duration-300">
                       <LogOut className="h-3 w-3 text-red-400 transform skew-x-6" />
                     </div>
-                    <span className="text-gray-300 group-hover/item:text-white font-circular-web font-bold uppercase text-xs tracking-wider">
+                    <span className="text-gray-300 group-hover/item:text-white font-bold uppercase text-xs tracking-wider">
                       {isLoading ? 'Signing out...' : 'Sign Out'}
                     </span>
                   </div>
@@ -332,7 +339,6 @@ const ProfileDropdown = () => {
               </button>
             </div>
 
-            {/* Bottom accent line */}
             <div className="h-px bg-gradient-to-r from-transparent via-primary to-transparent" />
           </div>
         </div>

@@ -137,7 +137,7 @@ const TabComponent = ({ activeTab, onTabChange, tournament }) => {
       {/* Tournament Rules Section - Tech Panel Style */}
       <div className="relative">
         {/* Side accent stripe */}
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/50 to-primary"></div>
+        {/* <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/50 to-primary"></div> */}
         
         <div className="ml-6 bg-black/60 border-l-4 border-primary p-6 md:p-8 relative overflow-hidden">
           {/* Grid pattern overlay */}

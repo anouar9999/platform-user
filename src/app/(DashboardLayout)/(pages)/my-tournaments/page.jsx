@@ -84,7 +84,7 @@ const ParticipantTournaments = ({ participantId }) => {
   }
 
   return (
-    <div className="bg-transparent text-white p-12 rounded-lg">
+    <div className="bg-transparent text-white p-12 xl:p-18 rounded-lg">
       <ToastContainer />
 
       {/* <h3 className="text-5xl md:text-4xl lg:text-5xl tracking-wider mb-10 uppercase font-custom">
@@ -95,33 +95,11 @@ const ParticipantTournaments = ({ participantId }) => {
   <div className="mb-8">
           <div className="flex items-center justify-between  ">
                <ScannableTitle 
-    primaryText= { 'FROM CHALLENGER TO CHAMPION'}
+    primaryText= { 'MY TOURNAMENTS'}
     secondaryText="YOUR TOURNAMENT JOURNEY !"
   />
           <div className="flex items-center gap-3">
-    <div className="relative inline-block px-1 group">
-      {/* Animated corner accents */}
-      <div className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-orange-500 transition-all duration-300 group-hover:w-4 group-hover:h-4"></div>
-      <div className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2 border-orange-500 transition-all duration-300 group-hover:w-4 group-hover:h-4"></div>
-      <div className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-orange-500 transition-all duration-300 group-hover:w-4 group-hover:h-4"></div>
-      <div className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-orange-500 transition-all duration-300 group-hover:w-4 group-hover:h-4"></div>
-  
-      {/* Rotating border glow effect */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-500 via-yellow-400 to-orange-500 blur-md animate-pulse"></div>
-      </div>
-  
-  
-      {/* Enhanced skewed bottom shadow effect */}
-      <div 
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-4/5 h-3 bg-orange-500/40 blur-lg opacity-70 group-hover:opacity-100 group-hover:h-4 transition-all duration-300"
-        style={{ clipPath: 'polygon(15% 0, 85% 0, 100% 100%, 0 100%)' }}
-      ></div>
-  
-      {/* Side glow effects */}
-      <div className="absolute top-1/2 -left-2 w-1 h-1/2 -translate-y-1/2 bg-orange-500/0 group-hover:bg-orange-500/50 blur-sm transition-all duration-300"></div>
-      <div className="absolute top-1/2 -right-2 w-1 h-1/2 -translate-y-1/2 bg-orange-500/0 group-hover:bg-orange-500/50 blur-sm transition-all duration-300"></div>
-    </div>
+   
   </div>
           </div>
           

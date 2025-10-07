@@ -100,22 +100,7 @@ const TournamentCard = ({
               </div>
               
               {/* Game Badge - Positioned on the right */}
-              {game && (
-                <div className="">
-                  <span 
-                    className="text-xs px-3 py-1  font-valorant text-white w-fit inline-block relative overflow-hidden"
-                    style={{
-                      backgroundImage: `url(${game.image})`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      textShadow: '0px 0px 4px rgba(0,0,0,0.8)'
-                    }}
-                  >
-                    <div className="absolute inset-0 bg-black opacity-40"></div>
-                    <span className="relative z-10">{game.name}</span>
-                  </span>
-                </div>
-              )}
+             
             </div>
           </div>
 

@@ -115,37 +115,37 @@ export default function ForgotPasswordForm() {
         backgroundPosition: 'center',
       }}
     >
-       {/* Server Message Display */}
-          <AnimatePresence>
-            {serverMessage.message && (
-              <motion.div
-                className={`mb-6 p-4 z-50 rounded-lg ${
-                  serverMessage.type === 'error'
-                    ? 'bg-red-900/40 text-red-200 border border-red-700/50'
-                    : 'bg-green-900/40 text-green-200 border border-green-700/50'
-                }`}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
+      {/* Server Message Display */}
+      <AnimatePresence>
+        {serverMessage.message && (
+          <motion.div
+            className={`mb-6 p-4 z-50 rounded-lg ${
+              serverMessage.type === 'error'
+                ? 'bg-red-900/40 text-red-200 border border-red-700/50'
+                : 'bg-green-900/40 text-green-200 border border-green-700/50'
+            }`}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="flex items-start">
+              {serverMessage.type === 'success' ? (
+                <CheckCircleIcon className="h-5 w-5 mr-2 text-green-400 mt-0.5" />
+              ) : (
+                <div className="h-5 w-5 mr-2 text-red-400 mt-0.5">⚠️</div>
+              )}
+              <div className="flex-1">{serverMessage.message}</div>
+              <button
+                onClick={() => setServerMessage({ type: '', message: '' })}
+                className="ml-2 text-gray-400 hover:text-white"
               >
-                <div className="flex items-start">
-                  {serverMessage.type === 'success' ? (
-                    <CheckCircleIcon className="h-5 w-5 mr-2 text-green-400 mt-0.5" />
-                  ) : (
-                    <div className="h-5 w-5 mr-2 text-red-400 mt-0.5">⚠️</div>
-                  )}
-                  <div className="flex-1">{serverMessage.message}</div>
-                  <button
-                    onClick={() => setServerMessage({ type: '', message: '' })}
-                    className="ml-2 text-gray-400 hover:text-white"
-                  >
-                    <CloseIcon size={16} />
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                <CloseIcon size={16} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <div className="absolute inset-0 bg-gradient-to-t from-transparent to-secondary/80"></div>
 
       {/* Inject animated gradient CSS */}
@@ -168,8 +168,6 @@ export default function ForgotPasswordForm() {
         transition={{ duration: 0.6, ease: 'easeOut' }}
       >
         <div className="p-8">
-         
-
           <Formik
             initialValues={initialValues}
             validationSchema={forgotPasswordSchema}
