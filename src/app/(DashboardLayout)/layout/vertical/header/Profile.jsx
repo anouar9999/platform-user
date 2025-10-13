@@ -301,7 +301,7 @@ const ProfileDropdown = () => {
 
               {/* Home Link */}
               <a
-                href={`${process.env.NEXT_PUBLIC_FRONTEND_URL}`}
+                href={`https://gnews.ma`}
                 className="group/item relative flex items-center justify-between px-3 py-2 text-sm transition-all duration-300 overflow-hidden"
                 role="menuitem"
               >

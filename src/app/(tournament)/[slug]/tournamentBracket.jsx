@@ -2,129 +2,65 @@ import React, { useState, useEffect } from 'react';
 import { Bracket, Seed, SeedItem } from 'react-brackets';
 import { ChevronRight, Crown, Loader2, Trophy } from 'lucide-react';
 
-const SingleTournament = () => {
+const SingleTournament = ({ tournamentId }) => {
   const [rounds, setRounds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hoveredParticipant, setHoveredParticipant] = useState(null);
   const [isTeamTournament, setIsTeamTournament] = useState(true);
+  const [tournamentInfo, setTournamentInfo] = useState(null);
+  const [champion, setChampion] = useState(null);
 
   useEffect(() => {
-    // Simulate API fetch with realistic data
-    setTimeout(() => {
-      try {
-        const mockData = generateMockTournamentData();
-        formatMatches(mockData);
-        setIsTeamTournament(mockData.is_team_tournament);
-        setLoading(false);
-      } catch (err) {
-        console.error('Error loading tournament data:', err);
-        setError('Failed to load tournament bracket');
-        setLoading(false);
-      }
-    }, 1000);
-  }, []);
+    if (!tournamentId) {
+      setError('Tournament ID is required');
+      setLoading(false);
+      return;
+    }
 
-  const generateMockTournamentData = () => {
-    // Create a realistic 8-team tournament (3 rounds)
-    const teams = [
-      { id: 1, name: 'Phoenix Flames', avatar: null },
-      { id: 2, name: 'Arctic Wolves', avatar: null },
-      { id: 3, name: 'Thunder Dragons', avatar: null },
-      { id: 4, name: 'Royal Knights', avatar: null },
-      { id: 5, name: 'Shadow Hawks', avatar: null },
-      { id: 6, name: 'Cosmic Stars', avatar: null },
-      { id: 7, name: 'Storm Giants', avatar: null },
-      { id: 8, name: 'Golden Eagles', avatar: null }
-    ];
-    
-    // Round 1 (Quarter Finals) - All matches completed
-    const round1 = [
-      {
-        id: 'match-1',
-        round: 1,
-        position: 1,
-        status: 'SCORE_DONE',
-        teams: [
-          { ...teams[0], score: 3, winner: true },
-          { ...teams[1], score: 1, winner: false }
-        ]
-      },
-      {
-        id: 'match-2',
-        round: 1,
-        position: 2,
-        status: 'SCORE_DONE',
-        teams: [
-          { ...teams[2], score: 2, winner: true },
-          { ...teams[3], score: 0, winner: false }
-        ]
-      },
-      {
-        id: 'match-3',
-        round: 1,
-        position: 3,
-        status: 'SCORE_DONE',
-        teams: [
-          { ...teams[4], score: 1, winner: false },
-          { ...teams[5], score: 2, winner: true }
-        ]
-      },
-      {
-        id: 'match-4',
-        round: 1,
-        position: 4,
-        status: 'SCORE_DONE',
-        teams: [
-          { ...teams[6], score: 0, winner: false },
-          { ...teams[7], score: 3, winner: true }
-        ]
+    fetchTournamentData();
+  }, [tournamentId]);
+
+  const fetchTournamentData = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('https://api.gnews.ma/api/fetch_matches_bracket.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tournament_id: tournamentId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    ];
-    
-    // Round 2 (Semi Finals) - One match completed, one scheduled
-    const round2 = [
-      {
-        id: 'match-5',
-        round: 2,
-        position: 1,
-        status: 'SCORE_DONE',
-        teams: [
-          { ...teams[0], score: 2, winner: false },
-          { ...teams[2], score: 3, winner: true }
-        ]
-      },
-      {
-        id: 'match-6',
-        round: 2,
-        position: 2,
-        status: 'SCORE_DONE',
-        teams: [
-          { ...teams[5], score: 1, winner: false },
-          { ...teams[7], score: 2, winner: true }
-        ]
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to load tournament data');
       }
-    ];
-    
-    // Round 3 (Finals) - Match completed
-    const round3 = [
-      {
-        id: 'match-7',
-        round: 3,
-        position: 1,
-        status: 'SCORE_DONE',
-        teams: [
-          { ...teams[2], score: 4, winner: true },
-          { ...teams[7], score: 2, winner: false }
-        ]
-      }
-    ];
-    
-    return {
-      total_rounds: 3,
-      is_team_tournament: true,
-      matches: [...round1, ...round2, ...round3]
-    };
+
+      console.log('API Response:', result.data);
+
+      // Set tournament info
+      setTournamentInfo(result.data.tournament);
+      setIsTeamTournament(result.data.is_team_tournament);
+
+      // Format matches for display
+      formatMatches(result.data);
+      
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching tournament data:', err);
+      setError(err.message || 'Failed to load tournament bracket');
+      setLoading(false);
+    }
   };
 
   const formatMatches = (data) => {
@@ -136,7 +72,7 @@ const SingleTournament = () => {
     const totalRounds = data.total_rounds;
     const formattedRounds = [];
 
-    // Sort matches by position within each round
+    // Sort matches by round and position
     const matchesByRound = {};
     data.matches.forEach(match => {
       const round = parseInt(match.round);
@@ -178,26 +114,37 @@ const SingleTournament = () => {
             { name: 'TBD', score: 0, winner: false },
             { name: 'TBD', score: 0, winner: false },
           ]).map((team) => ({
-            ...team,
             id: team.id || `team-${Math.random()}`,
+            name: team.name || 'TBD',
+            score: team.score || 0,
+            winner: team.winner || false,
+            avatar: team.avatar || null,
           })),
         })),
       });
     }
 
     setRounds(formattedRounds);
+
+    // Find champion (winner of the last round)
+    if (formattedRounds.length > 0) {
+      const finalRound = formattedRounds[formattedRounds.length - 1];
+      if (finalRound.seeds.length > 0) {
+        const finalMatch = finalRound.seeds[0];
+        const winner = finalMatch.teams.find(team => team.winner);
+        if (winner && winner.name !== 'TBD') {
+          setChampion(winner);
+        }
+      }
+    }
   };
 
   const getRoundTitle = (round, totalRounds) => {
     if (round === totalRounds - 1) return <span className="font-bold text-2xl">Finals</span>;
-    if (round === totalRounds - 2)
-      return <span className="font-bold text-2xl">Semi Finals</span>;
-    if (round === totalRounds - 3)
-      return <span className="font-bold text-2xl">Quarter Finals</span>;
-    if (round === totalRounds - 4)
-      return <span className="font-bold text-2xl">Round of 16</span>;
-    if (round === totalRounds - 5)
-      return <span className="font-bold text-2xl">Round of 32</span>;
+    if (round === totalRounds - 2) return <span className="font-bold text-2xl">Semi Finals</span>;
+    if (round === totalRounds - 3) return <span className="font-bold text-2xl">Quarter Finals</span>;
+    if (round === totalRounds - 4) return <span className="font-bold text-2xl">Round of 16</span>;
+    if (round === totalRounds - 5) return <span className="font-bold text-2xl">Round of 32</span>;
     return `Round ${round + 1}`;
   };
 
@@ -240,9 +187,10 @@ const SingleTournament = () => {
                     relative
                   `}
                 >
+                  {/* Avatar or Initial */}
                   <div
                     className={`
-                      w-6 h-6 rounded-full flex items-center justify-center shrink-0
+                      w-6 h-6 rounded-full flex items-center justify-center shrink-0 overflow-hidden
                       ${
                         team.winner
                           ? 'bg-gradient-to-br from-violet-500 to-violet-600 ring-1 ring-violet-500'
@@ -250,15 +198,25 @@ const SingleTournament = () => {
                       }
                     `}
                   >
-                    <span
-                      className={`
-                        text-xs
-                        ${team.winner ? 'text-white' : 'text-gray-400'}
-                      `}
-                    >
-                      {isTBD(team) ? '?' : team.name.charAt(0).toUpperCase()}
-                    </span>
+                    {team.avatar ? (
+                      <img 
+                        src={team.avatar} 
+                        alt={team.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span
+                        className={`
+                          text-xs
+                          ${team.winner ? 'text-white' : 'text-gray-400'}
+                        `}
+                      >
+                        {isTBD(team) ? '?' : team.name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
                   </div>
+
+                  {/* Team Name */}
                   <div className="flex items-center gap-2 min-w-0 flex-1 ml-2">
                     <span
                       className={`
@@ -280,6 +238,8 @@ const SingleTournament = () => {
                       />
                     )}
                   </div>
+
+                  {/* Score */}
                   <span
                     className={`
                       text-sm min-w-[20px] text-right ml-2 font-medium
@@ -293,6 +253,7 @@ const SingleTournament = () => {
               </div>
             ))}
           </div>
+
           {/* Championship Banner - only for finals winner */}
           {seed.teams.some((team) => team.winner) &&
             getRoundTitle(roundIndex, rounds.length).props?.children === 'Finals' && (
@@ -333,9 +294,11 @@ const SingleTournament = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gray-900 p-4">
+    <div className="min-h-screen w-full  p-4">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-6 text-center">Tournament Championship 2025</h1>
+        <h1 className="text-3xl font-bold text-white mb-6 text-center">
+          {tournamentInfo?.name || 'Tournament Championship'}
+        </h1>
         
         <div className="w-full h-full rounded-xl bg-gray-900 p-4 shadow-lg">
           {loading ? (
@@ -344,8 +307,14 @@ const SingleTournament = () => {
               <span>Loading tournament bracket...</span>
             </div>
           ) : error ? (
-            <div className="min-h-[400px] flex items-center justify-center text-gray-400">
-              {error}
+            <div className="min-h-[400px] flex flex-col items-center justify-center text-gray-400">
+              <p className="mb-4">{error}</p>
+              <button
+                onClick={fetchTournamentData}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+              >
+                Retry
+              </button>
             </div>
           ) : (
             <div className="w-full overflow-x-auto pb-8">

@@ -6,7 +6,7 @@ import Image from 'next/image';
 // ============================================
 // MOCK DATA - Set to true to use mock data
 // ============================================
-const USE_MOCK_DATA = true;
+const USE_MOCK_DATA =false;
 
 const MOCK_PARTICIPANTS = [
   {
@@ -46,7 +46,7 @@ const MOCK_PARTICIPANTS = [
   {
     registration_id: 6,
     type: 'team',
-    team_name: 'Elite Forces',
+	    team_name: 'Elite Forces',
     team_avatar: null, // Test default avatar
     division: 'Diamond 1',
     total_members: 4,
@@ -118,7 +118,7 @@ const ParticipantOrTeamCard = ({ item }) => {
   const isCurrentUser = !isTeam && localStorage.getItem('username') === item.username;
   const avatarSrc = isTeam
     ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${item.team_avatar}`
-    : item.avatar;
+    : `${process.env.NEXT_PUBLIC_BACKEND_URL}${item.avatar}`;
 
   return (
     <div className="group relative">

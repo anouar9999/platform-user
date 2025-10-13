@@ -1,6 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  async rewrites() {
+
+   experimental: {
+    // Reduce memory usage during build
+    workerThreads: false,
+    cpus: 1
+  },
+  // Disable source maps in production to save memory
+  productionBrowserSourceMaps: false,
+ async rewrites() {
     return [
       {
         source: '/landingPage/:path*',

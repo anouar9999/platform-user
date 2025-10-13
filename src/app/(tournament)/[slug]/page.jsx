@@ -186,7 +186,7 @@ const TabComponent = ({ activeTab, onTabChange, tournament }) => {
         return <ParticipantCardGrid tournamentId={tournament.id} />;
       case 'Bracket':
         if (tournament.bracket_type === 'Single Elimination') {
-          return <SingleTournament />;
+          return <SingleTournament  tournamentId={tournament.id} />;
         } else if (tournament.bracket_type === 'Double Elimination') {
           return <DoubleTournament />;
         } else if (tournament.bracket_type === 'Battle Royale') {

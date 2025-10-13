@@ -299,47 +299,70 @@ const CreateTeamForm = ({ isOpen, onClose, onSuccess }) => {
     }
   };
 
-  const onSubmit = async (data) => {
-    setLoading(true);
-    try {
-      const authData = JSON.parse(localStorage.getItem('authData'));
-      const userId = authData?.userId;
+const onSubmit = async (data) => {
+  setLoading(true);
+  try {
+    const authData = JSON.parse(localStorage.getItem('authData'));
+    const userId = authData?.userId;
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/create_team.php`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...data,
-          owner_id: userId,
-          captain_id: userId,
-        }),
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        addToast({
-          type: 'success',
-          message: 'Team created successfully!',
-          duration: 5000,
-          position: 'bottom-right',
-        });
-        onSuccess?.();
-        onClose();
+    // Create FormData instead of JSON
+    const formData = new FormData();
+    
+    // Add all text fields
+    Object.keys(data).forEach(key => {
+      if (key !== 'logo' && key !== 'banner') {
+        formData.append(key, data[key]);
       }
-    } catch (err) {
-      console.error('Error creating team:', err);
-       addToast({
-          type: 'error',
-          message: `Failed to create team ${err}`,
-          duration: 5000,
-          position: 'bottom-right',
-        });
-      // alert('Failed to create team');
-    } finally {
-      setLoading(false);
+    });
+    
+    // Add user IDs
+    formData.append('owner_id', userId);
+    formData.append('captain_id', userId);
+    
+    // Add files directly (not base64)
+    if (data.logo instanceof File) {
+      formData.append('logo', data.logo);
     }
-  };
+    
+    if (data.banner instanceof File) {
+      formData.append('banner', data.banner);
+    }
 
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/create_team.php`, {
+      method: 'POST',
+      // Don't set Content-Type header - browser will set it with boundary
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    if (result.success) {
+      addToast({
+        type: 'success',
+        message: 'Team created successfully!',
+        duration: 5000,
+        position: 'bottom-right',
+      });
+      onSuccess?.();
+      onClose();
+    } else {
+      throw new Error(result.message || 'Failed to create team');
+    }
+  } catch (err) {
+    console.error('Error creating team:', err);
+    addToast({
+      type: 'error',
+      message: `Failed to create team: ${err.message}`,
+      duration: 5000,
+      position: 'bottom-right',
+    });
+  } finally {
+    setLoading(false);
+  }
+};
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
