@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bracket, Seed, SeedItem } from 'react-brackets';
-import { ChevronRight, Crown, Loader2, Trophy } from 'lucide-react';
+import { Brackets, ChevronRight, Crown, Loader2, Trophy, Users } from 'lucide-react';
 
 const SingleTournament = ({ tournamentId }) => {
   const [rounds, setRounds] = useState([]);
@@ -65,7 +65,7 @@ const SingleTournament = ({ tournamentId }) => {
 
   const formatMatches = (data) => {
     if (!data?.matches?.length) {
-      setError('The bracket is not implemented yet');
+      setError(' The bracket will appear here once matches are ready');
       return;
     }
 
@@ -296,26 +296,46 @@ const SingleTournament = ({ tournamentId }) => {
   return (
     <div className="min-h-screen w-full  p-4">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-6 text-center">
-          {tournamentInfo?.name || 'Tournament Championship'}
-        </h1>
         
-        <div className="w-full h-full rounded-xl bg-gray-900 p-4 shadow-lg">
+        
+        <div className="w-full h-full rounded-xl p-4 shadow-lg">
           {loading ? (
             <div className="min-h-[400px] flex items-center justify-center text-gray-400">
               <Loader2 className="w-6 h-6 animate-spin mr-2" />
               <span>Loading tournament bracket...</span>
             </div>
           ) : error ? (
-            <div className="min-h-[400px] flex flex-col items-center justify-center text-gray-400">
-              <p className="mb-4">{error}</p>
-              <button
-                onClick={fetchTournamentData}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-              >
-                Retry
-              </button>
+              <div className="relative max-w-md mx-auto my-12">
+        {/* Decorative corners */}
+        <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-primary"></div>
+        <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-primary"></div>
+        <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-primary"></div>
+        <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-primary"></div>
+
+        <div className="bg-black/40 border border-white/10 p-8 text-center">
+          {/* Scanline effect */}
+          <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,61,8,0.02)_2px,rgba(255,61,8,0.02)_4px)] opacity-50"></div>
+
+          <div className="relative z-10">
+            <div className="w-16 h-16 flex items-center justify-center mx-auto mb-4 transform -skew-x-6">
+              <Brackets className="text-primary w-8 h-8 transform skew-x-6" />
+             
             </div>
+
+            <h3 className="text-xl font-zentry text-white mb-3 uppercase tracking-wider">
+             {error}
+            </h3>
+
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <div className="h-px w-8 bg-primary"></div>
+              <div className="h-1 w-1 bg-primary transform rotate-45"></div>
+              <div className="h-px w-8 bg-primary"></div>
+            </div>
+
+           
+          </div>
+        </div>
+      </div>
           ) : (
             <div className="w-full overflow-x-auto pb-8">
               <Bracket
