@@ -47,6 +47,7 @@ const useTeamsData = (userId) => {
       const result = await response.json();
 
       if (result.success) {
+        console.log('Fetched teams:', result.data);
         const allTeamsData = result.data || [];
         const userOwnedTeams = allTeamsData.filter(
           (team) =>
@@ -113,31 +114,7 @@ const TeamHub = () => {
 
   const { allTeams, myTeams, isLoading, error, refreshTeams } = useTeamsData(userId);
 
-  // Get the page title based on active tab
-  const getPageTitle = () => {
-    const titles = {
-      myTeams: [
-        'YOUR TEAM HEADQUARTERS',
-        'COMMAND CENTER',
-        'SQUAD CENTRAL',
-        'YOUR GAMING ALLIANCE',
-        'TEAM STRONGHOLD',
-      ],
-      allTeams: [
-        'DISCOVER TEAMS',
-        'GAMING LEGIONS',
-        'TEAM UNIVERSE',
-        'ALLIANCE FRONTIER',
-        'SQUAD HORIZON',
-      ],
-    };
-
-    // Get random index but make it somewhat persistent during a session
-    const sessionSeed = new Date().getDate() % titles[activeTab].length;
-
-    // Return a dynamic title based on the active tab
-    return titles[activeTab][sessionSeed];
-  };
+ 
  const router= useRouter();
 
   const handleTeamClick = (team) => {
@@ -495,7 +472,7 @@ const TeamHub = () => {
         </div>
       </div>
       
-      <div className="w-full sm:w-auto">
+      <div className="w-full sm:w-1/2 md:w-1/2 lg:w-1/2">
         <SearchBar value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
       </div>
     </div>

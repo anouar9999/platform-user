@@ -22,12 +22,14 @@ import {
   UsersRound
 } from 'lucide-react';
 import Image from 'next/image';
+import { IoIosStats } from "react-icons/io";
+import { TbTournament } from "react-icons/tb";
 
 const menuItems = [
-  { id: 1, icon: Trophy, name: 'Tournaments', href: '/tournaments' },
+  { id: 1, icon: TbTournament , name: 'Tournaments', href: '/tournaments' },
   { id: 2, icon: Medal, name: 'My Tournament', href: '/my-tournaments' },
   { id: 3, icon: Users2, name: 'Teams', href: '/teams' },
-  { id: 4, icon: Settings, name: 'Stats', href: '/settings' },
+  { id: 4, icon: IoIosStats , name: 'Stats', href: '/settings' },
 ];
 
 const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {

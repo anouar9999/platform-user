@@ -635,3 +635,38 @@ body.modal-open {
       opacity: 0;
    }
 }
+
+/* Hide the dashboard sidebar when a detail page or modal requires full-bleed content */
+body.hide-dashboard-sidebar .fixed.left-0.top-0.h-full {
+    transform: translateX(-120%) !important;
+    transition: transform 300ms ease-in-out !important;
+}
+
+/* Also hide the mobile overlay if present to avoid dark backdrop */
+body.hide-dashboard-sidebar .fixed.inset-0.bg-dark {
+   display: none !important;
+}
+
+/* Responsive adjustments: hide sidebar differently per breakpoint and expand content */
+/* Small screens: fully slide the sidebar out of view */
+body.hide-dashboard-sidebar .fixed.left-0.top-0.h-full {
+   transform: translateX(-100%) !important;
+}
+
+/* Medium and up: translate by a fixed pixel amount (covers wider sidebar widths) */
+@media (min-width: 768px) {
+   body.hide-dashboard-sidebar .fixed.left-0.top-0.h-full {
+      transform: translateX(-300px) !important;
+   }
+   /* Remove left padding added to the main content wrapper in layout.jsx */
+   body.hide-dashboard-sidebar main > div {
+      padding-left: 0 !important;
+      margin-left: 0 !important;
+   }
+}
+
+@media (min-width: 1024px) {
+   body.hide-dashboard-sidebar .fixed.left-0.top-0.h-full {
+      transform: translateX(-320px) !important;
+   }
+}
