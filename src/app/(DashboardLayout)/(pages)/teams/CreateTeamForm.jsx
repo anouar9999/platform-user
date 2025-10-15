@@ -24,8 +24,16 @@ const stepSchemas = {
     description: yup.string().required('Description is required').min(10, 'Min 10 characters'),
   }),
   2: yup.object({
-    logo: yup.string().required('Team logo is required'),
-    banner: yup.string().nullable(),
+    logo: yup
+      .string()
+      .nullable()
+      .typeError('Team logo is required')
+      .required('Team logo is required'),
+    banner: yup
+      .string()
+      .nullable()
+      .typeError('Team banner is required')
+      .required('Team banner is required'),
   }),
   3: yup.object({
     game_id: yup.number().required('Please select a game').positive('Please select a game'),
@@ -261,11 +269,11 @@ const CreateTeamForm = ({ isOpen, onClose, onSuccess }) => {
 
     if (file.size > 2 * 1024 * 1024) {
       addToast({
-          type: 'error',
-          message: `Image must be less than 2MB`,
-          duration: 5000,
-          position: 'bottom-right',
-        });
+        type: 'error',
+        message: `Image must be less than 2MB`,
+        duration: 5000,
+        position: 'bottom-right',
+      });
       return;
     }
 
@@ -299,70 +307,70 @@ const CreateTeamForm = ({ isOpen, onClose, onSuccess }) => {
     }
   };
 
-const onSubmit = async (data) => {
-  setLoading(true);
-  try {
-    const authData = JSON.parse(localStorage.getItem('authData'));
-    const userId = authData?.userId;
+  const onSubmit = async (data) => {
+    setLoading(true);
+    try {
+      const authData = JSON.parse(localStorage.getItem('authData'));
+      const userId = authData?.userId;
 
-    // Create FormData instead of JSON
-    const formData = new FormData();
-    
-    // Add all text fields
-    Object.keys(data).forEach(key => {
-      if (key !== 'logo' && key !== 'banner') {
-        formData.append(key, data[key]);
+      // Create FormData instead of JSON
+      const formData = new FormData();
+
+      // Add all text fields
+      Object.keys(data).forEach((key) => {
+        if (key !== 'logo' && key !== 'banner') {
+          formData.append(key, data[key]);
+        }
+      });
+
+      // Add user IDs
+      formData.append('owner_id', userId);
+      formData.append('captain_id', userId);
+
+      // Add files directly (not base64)
+      if (data.logo instanceof File) {
+        formData.append('logo', data.logo);
       }
-    });
-    
-    // Add user IDs
-    formData.append('owner_id', userId);
-    formData.append('captain_id', userId);
-    
-    // Add files directly (not base64)
-    if (data.logo instanceof File) {
-      formData.append('logo', data.logo);
-    }
-    
-    if (data.banner instanceof File) {
-      formData.append('banner', data.banner);
-    }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/create_team.php`, {
-      method: 'POST',
-      // Don't set Content-Type header - browser will set it with boundary
-      body: formData,
-    });
+      if (data.banner instanceof File) {
+        formData.append('banner', data.banner);
+      }
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/create_team.php`, {
+        method: 'POST',
+        // Don't set Content-Type header - browser will set it with boundary
+        body: formData,
+      });
 
-    const result = await response.json();
-    if (result.success) {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        addToast({
+          type: 'success',
+          message: 'Team created successfully!',
+          duration: 5000,
+          position: 'bottom-right',
+        });
+        onSuccess?.();
+        onClose();
+      } else {
+        throw new Error(result.message || 'Failed to create team');
+      }
+    } catch (err) {
+      console.error('Error creating team:', err);
       addToast({
-        type: 'success',
-        message: 'Team created successfully!',
+        type: 'error',
+        message: `Failed to create team: ${err.message}`,
         duration: 5000,
         position: 'bottom-right',
       });
-      onSuccess?.();
-      onClose();
-    } else {
-      throw new Error(result.message || 'Failed to create team');
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error('Error creating team:', err);
-    addToast({
-      type: 'error',
-      message: `Failed to create team: ${err.message}`,
-      duration: 5000,
-      position: 'bottom-right',
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+  };
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
@@ -400,8 +408,13 @@ const onSubmit = async (data) => {
                 Team Branding
               </h2>
               <div className="h-1 w-20 bg-gradient-to-r from-orange-500 to-orange-500/30 rounded-full "></div>
-            </div>
-
+            </div>{' '}
+            {errors.banner && (
+              <p className="text-red-400 text-sm  font-circular-web flex items-center gap-1 mt-2">
+                <AlertCircle size={14} />
+                {errors.banner.message}
+              </p>
+            )}
             <div className="relative inline-block px-1 w-full group">
               <div className="absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 border-orange-500"></div>
               <div className="absolute -top-1 -right-1 w-2 h-2 border-t-2 border-r-2 border-orange-500"></div>
@@ -417,6 +430,7 @@ const onSubmit = async (data) => {
               >
                 <div className="relative bg-black/40 border border-gray-800">
                   {/* Banner Section */}
+
                   <div className="relative h-48 bg-gray-900 cursor-pointer group/banner">
                     {bannerPreview ? (
                       <>
@@ -434,11 +448,6 @@ const onSubmit = async (data) => {
                       </>
                     ) : (
                       <>
-                        <img
-                          src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1200&h=400&fit=crop"
-                          alt="Default banner"
-                          className="w-full h-full object-cover opacity-20"
-                        />
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="text-center">
                             <Upload className="w-12 h-12 mx-auto mb-2 text-orange-500" />
@@ -476,11 +485,6 @@ const onSubmit = async (data) => {
                         </>
                       ) : (
                         <>
-                          <img
-                            src="https://ui-avatars.com/api/?name=Team&background=1f2937&color=f97316&size=200&bold=true"
-                            alt="Default logo"
-                            className="w-full h-full object-cover opacity-40"
-                          />
                           <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover/logo:bg-black/60 transition-colors">
                             <Upload
                               className="text-orange-500 group-hover/logo:scale-110 transition-transform"
@@ -509,7 +513,6 @@ const onSubmit = async (data) => {
                 </div>
               </div>
             </div>
-
             {errors.logo && (
               <p className="text-red-400 text-sm flex items-center gap-1">
                 <AlertCircle size={14} />

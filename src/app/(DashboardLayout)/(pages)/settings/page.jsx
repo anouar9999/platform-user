@@ -1,212 +1,131 @@
-"use client"
+'use client';
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import axios from 'axios';
-import { Settings, Trophy, Users, Target, ArrowUp, Star, Shield, Mail, Calendar, User } from 'lucide-react';
+import { User, Mail, MapPin, Calendar, Shield, Camera, Save, X, Loader2 } from 'lucide-react';
+import ScannableTitle from '@/app/(DashboardLayout)/components/ScannableTitle';
 
-const Profile = () => {
-  const router = useRouter();
-  const [userId, setUserId] = useState(null);
-  const [user, setUser] = useState({
-    username: '',
-    email: '',
-    type: '',
-    points: 0,
-    rank: '',
-    bio: '',
-    avatar: '',
-    user_type: '',
-    tournament_stats: {
-      individual_participations: 0,
-      team_participations: 0,
-      total_participations: 0
-    },
-  });
-  
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
-  useEffect(() => {
-    const localAuthData = localStorage.getItem('authData');
-    const parsedData = JSON.parse(localAuthData);
-    const user_id = parsedData.userId;
-    setUserId(user_id);
-    
-    if (user_id) fetchUserSettings(user_id);
-  }, []);
-
-  const fetchUserSettings = async (user_id) => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user_settings.php?id=${user_id}`);
-      console.log(response.data.data);
-      if (response.data) {
-        setUser(prev => ({ ...prev, ...response.data.data }));
-      }
-    } catch (err) {
-      setError('Failed to fetch user settings');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const StatCard = ({ title, value, icon: Icon, color, gradientFrom, gradientTo }) => (
-    <div className="relative inline-block px-1 group">
-      <div className={`absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 ${color} transition-all duration-300 group-hover:w-3 group-hover:h-3`}></div>
-      <div className={`absolute -bottom-1 -right-1 w-2 h-2 border-b-2 border-r-2 ${color} transition-all duration-300 group-hover:w-3 group-hover:h-3`}></div>
-      
-      <div 
-        className="relative overflow-hidden transition-all duration-300 group-hover:scale-105"
-        style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
-      >
-        <div className={`relative bg-gradient-to-br ${gradientFrom} ${gradientTo} border ${color.replace('border-', 'border-')}/30 p-6 sm:p-8 text-center`}>
-          <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,255,255,0.02)_2px,rgba(255,255,255,0.02)_4px)] opacity-50"></div>
-          <div className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-${color.split('-')[1]}-500 to-transparent opacity-50`}></div>
-          <div className={`absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-${color.split('-')[1]}-500 to-transparent opacity-50`}></div>
-          
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
-              <h2 className="font-semibold text-lg sm:text-base md:text-xl font-zentry text-gray-200 uppercase ">{title}</h2>
-              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full ${gradientFrom} ${gradientTo} flex items-center justify-center border-2 ${color.replace('border-', 'border-')}/50`}>
-                <Icon className={`w-5 h-5 sm:w-6 sm:h-6 text-white`} />
-              </div>
-            </div>
-            
-            <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-custom text-white">{value}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  if (loading) return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
-      <div className="animate-spin rounded-full h-16 w-16 sm:h-24 sm:w-24 border-t-2 border-b-2 border-orange-500"></div>
-    </div>
-  );
-
-  const defaultAvatarSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-    <circle cx="64" cy="64" r="64" fill="#1F2937"/>
-    <path d="M108 128C108 103.699 88.3005 84 64 84C39.6995 84 20 103.699 20 128" fill="#374151"/>
-    <circle cx="64" cy="50" r="24" fill="#374151"/>
-  </svg>`;
+const FuturisticInput = ({ label, icon: Icon, error, ...props }) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const [hasValue, setHasValue] = useState(props.value !== '');
 
   return (
-    <div className="min-h-screen  text-white mt-8 p-4 sm:p-6 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Profile Header Card */}
-        <div className="relative inline-block px-1 w-full group mb-6 sm:mb-8">
-          <div className="absolute -top-1 -left-1 w-3 h-3 sm:w-4 sm:h-4 border-t-2 border-l-2 border-orange-500 transition-all duration-300 group-hover:w-4 group-hover:h-4 sm:group-hover:w-5 sm:group-hover:h-5"></div>
-          <div className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 border-t-2 border-r-2 border-orange-500 transition-all duration-300 group-hover:w-4 group-hover:h-4 sm:group-hover:w-5 sm:group-hover:h-5"></div>
-          <div className="absolute -bottom-1 -left-1 w-3 h-3 sm:w-4 sm:h-4 border-b-2 border-l-2 border-orange-500 transition-all duration-300 group-hover:w-4 group-hover:h-4 sm:group-hover:w-5 sm:group-hover:h-5"></div>
-          <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 border-b-2 border-r-2 border-orange-500 transition-all duration-300 group-hover:w-4 group-hover:h-4 sm:group-hover:w-5 sm:group-hover:h-5"></div>
+    <div className="relative inline-block px-1 w-full group mb-1">
+      <div className={`absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 transition-all duration-300 ${
+        error ? 'border-red-500' : isFocused ? 'border-primary' : 'border-transparent'
+      }`}></div>
+      <div className={`absolute -bottom-1 -right-1 w-2 h-2 border-b-2 border-r-2 transition-all duration-300 ${
+        error ? 'border-red-500' : isFocused ? 'border-primary' : 'border-transparent'
+      }`}></div>
 
-          <div 
-            className="relative overflow-hidden transition-all duration-300"
-            style={{ clipPath: 'polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)' }}
-          >
-            <div className="relative bg-black/40 border border-orange-500/30 p-6 sm:p-8">
-              <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,255,255,0.02)_2px,rgba(255,255,255,0.02)_4px)] opacity-50"></div>
-              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent opacity-50"></div>
-              <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent opacity-50"></div>
+      <div 
+        className="relative overflow-hidden transition-all duration-300"
+        style={{ 
+          clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
+          transform: isFocused ? 'scale(1.02)' : 'scale(1)'
+        }}
+      >
+        <div className={`relative transition-all duration-300 ${
+          error 
+            ? 'bg-red-900/20 border-2 border-red-500/50' 
+            : isFocused
+            ? 'bg-black/60 border-2 border-primary/50'
+            : 'bg-black/40 border-2 border-white/10'
+        }`}>
+          <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_1px,rgba(255,255,255,0.02)_1px,rgba(255,255,255,0.02)_2px)] opacity-50 pointer-events-none"></div>
+          
+          <div className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent transition-opacity duration-300 ${isFocused ? 'opacity-100' : 'opacity-0'}`}></div>
+          
+          {Icon && (
+            <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-200 ${
+              isFocused ? 'text-primary' : 'text-gray-500'
+            }`} />
+          )}
+          
+          <label className={`absolute ${Icon ? 'left-12' : 'left-4'} text-gray-500 transition-all duration-200 pointer-events-none ${
+            isFocused || hasValue 
+              ? 'top-2 text-xs text-primary font-zentry tracking-wider ' 
+              : 'top-1/2 -translate-y-1/2 text-sm'
+          }`}>
+            {label}
+          </label>
 
-              <div className="relative z-10 flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
-                {/* Avatar Section */}
-                <div className="flex flex-col items-center gap-4">
-                  <div className="relative group/avatar">
-                    <div className="absolute -top-2 -left-2 w-4 h-4 sm:w-6 sm:h-6 border-t-2 border-l-2 border-orange-500 transition-all duration-300 group-hover/avatar:w-5 group-hover/avatar:h-5 sm:group-hover/avatar:w-8 sm:group-hover/avatar:h-8"></div>
-                    <div className="absolute -top-2 -right-2 w-4 h-4 sm:w-6 sm:h-6 border-t-2 border-r-2 border-orange-500 transition-all duration-300 group-hover/avatar:w-5 group-hover/avatar:h-5 sm:group-hover/avatar:w-8 sm:group-hover/avatar:h-8"></div>
-                    <div className="absolute -bottom-2 -left-2 w-4 h-4 sm:w-6 sm:h-6 border-b-2 border-l-2 border-orange-500 transition-all duration-300 group-hover/avatar:w-5 group-hover/avatar:h-5 sm:group-hover/avatar:w-8 sm:group-hover/avatar:h-8"></div>
-                    <div className="absolute -bottom-2 -right-2 w-4 h-4 sm:w-6 sm:h-6 border-b-2 border-r-2 border-orange-500 transition-all duration-300 group-hover/avatar:w-5 group-hover/avatar:h-5 sm:group-hover/avatar:w-8 sm:group-hover/avatar:h-8"></div>
-                    
-                    <div className="absolute inset-0 bg-orange-500/20 blur-2xl animate-pulse"></div>
-                    
-                    <div 
-                      className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 overflow-hidden transition-all duration-300 group-hover/avatar:scale-105"
-                      style={{ clipPath: 'polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)' }}
-                    >
-                      <img 
-                        src={user.avatar ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${user.avatar}` : `data:image/svg+xml,${encodeURIComponent(defaultAvatarSvg)}`}
-                        alt={user.username} 
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,255,255,0.05)_2px,rgba(255,255,255,0.05)_4px)]"></div>
-                    </div>
-                  </div>
-
-                  <div className="text-center">
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl special-font  text-white uppercase">
-                      {user.username}
-                    </h2>
-                  </div>
-                </div>
-
-                {/* Tournament Stats */}
-                <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto flex-1">
-                  {[
-                    { count: user.tournament_stats.individual_participations, type: 'Player', Icon: User, gradientFrom: 'from-blue-400', gradientTo: 'to-blue-600', border: 'border-blue-500' },
-                    { count: user.tournament_stats.team_participations, type: 'Team', Icon: Users, gradientFrom: 'from-purple-400', gradientTo: 'to-purple-600', border: 'border-purple-500' }
-                  ].map(({ count, type, Icon, gradientFrom, gradientTo, border }) => (
-                    <div key={type} className="relative inline-block px-1 group/stat flex-1">
-                      <div className={`absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 ${border} transition-all duration-300 group-hover/stat:w-3 group-hover/stat:h-3`}></div>
-                      <div className={`absolute -bottom-1 -right-1 w-2 h-2 border-b-2 border-r-2 ${border} transition-all duration-300 group-hover/stat:w-3 group-hover/stat:h-3`}></div>
-                      
-                      <div 
-                        className="relative overflow-hidden transition-all duration-300 group-hover/stat:scale-105"
-                        style={{ clipPath: 'polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px)' }}
-                      >
-                        <div className="relative bg-black/30 border border-white/10 p-4 sm:p-6 text-center">
-                          <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_1px,rgba(255,255,255,0.02)_1px,rgba(255,255,255,0.02)_2px)] opacity-50"></div>
-                          
-                          <div className="relative z-10">
-                            <div className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 rounded-full bg-gradient-to-r ${gradientFrom} ${gradientTo} flex items-center justify-center`}>
-                              <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                            </div>
-                            <div className={`text-3xl sm:text-4xl md:text-5xl font-custom bg-gradient-to-r ${gradientFrom} ${gradientTo} text-transparent bg-clip-text`}>
-                              {count}
-                            </div>
-                            <div className="text-lg sm:text-lg font-circular-web font-bold text-gray-400 mt-1 uppercase ">
-                              Tournaments as {type}
-                            </div>
-                            <div className="w-12 sm:w-16 h-1 bg-gray-700/50 mt-2 sm:mt-3 mx-auto rounded-full overflow-hidden">
-                              <div className={`w-full h-full bg-gradient-to-r ${gradientFrom} ${gradientTo}`} />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+          <input
+            {...props}
+            onFocus={(e) => {
+              setIsFocused(true);
+              props.onFocus?.(e);
+            }}
+            onBlur={(e) => {
+              setIsFocused(false);
+              setHasValue(e.target.value !== '');
+              props.onBlur?.(e);
+            }}
+            onChange={(e) => {
+              setHasValue(e.target.value !== '');
+              props.onChange?.(e);
+            }}
+            className={`relative z-10 w-full ${Icon ? 'pl-12' : 'pl-4'} pr-4 pt-6 pb-2 bg-transparent font-circular-web text-white focus:outline-none transition-all duration-300`}
+          />
         </div>
+      </div>
+      {error && (
+        <p className="text-red-500 text-xs mt-1 ml-2">{error}</p>
+      )}
+    </div>
+  );
+};
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          <StatCard 
-            title="Your Rank" 
-            value={user.rank || 'N/A'}
-            icon={Star}
-            color="border-yellow-500"
-            gradientFrom="from-yellow-900/40"
-            gradientTo="to-yellow-950/40"
-          />
-          <StatCard 
-            title="Points" 
-            value={user.points}
-            icon={Target}
-            color="border-blue-500"
-            gradientFrom="from-blue-900/40"
-            gradientTo="to-blue-950/40"
-          />
-          <StatCard 
-            title="Tournament Activity" 
-            value={user.tournament_stats.total_participations}
-            icon={Trophy}
-            color="border-green-500"
-            gradientFrom="from-green-900/40"
-            gradientTo="to-green-950/40"
+const FuturisticTextarea = ({ label, error, ...props }) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const [hasValue, setHasValue] = useState(props.value !== '');
+
+  return (
+    <div className="relative inline-block px-1 w-full group mb-1">
+      <div className={`absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 transition-all duration-300 ${
+        isFocused ? 'border-primary' : 'border-transparent'
+      }`}></div>
+      <div className={`absolute -bottom-1 -right-1 w-2 h-2 border-b-2 border-r-2 transition-all duration-300 ${
+        isFocused ? 'border-primary' : 'border-transparent'
+      }`}></div>
+
+      <div 
+        className="relative overflow-hidden transition-all duration-300"
+        style={{ 
+          clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
+          transform: isFocused ? 'scale(1.02)' : 'scale(1)'
+        }}
+      >
+        <div className={`relative transition-all duration-300 ${
+          isFocused
+            ? 'bg-black/60 border-2 border-primary/50'
+            : 'bg-black/40 border-2 border-white/10'
+        }`}>
+          <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_1px,rgba(255,255,255,0.02)_1px,rgba(255,255,255,0.02)_2px)] opacity-50 pointer-events-none"></div>
+          
+          <label className={`absolute left-4 text-gray-500 transition-all duration-200 pointer-events-none ${
+            isFocused || hasValue 
+              ? 'top-2 text-xs text-primary' 
+              : 'top-4 text-sm'
+          }`}>
+            {label}
+          </label>
+
+          <textarea
+            {...props}
+            onFocus={(e) => {
+              setIsFocused(true);
+              props.onFocus?.(e);
+            }}
+            onBlur={(e) => {
+              setIsFocused(false);
+              setHasValue(e.target.value !== '');
+              props.onBlur?.(e);
+            }}
+            onChange={(e) => {
+              setHasValue(e.target.value !== '');
+              props.onChange?.(e);
+            }}
+            className="relative z-10 w-full px-4 pt-8 pb-2 bg-transparent text-white focus:outline-none transition-all duration-300 resize-none"
           />
         </div>
       </div>
@@ -214,4 +133,503 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+const UserProfileEdit = () => {
+  const [profileData, setProfileData] = useState({
+    username: '',
+    email: '',
+    bio: '',
+    avatar: '',
+    points: 0,
+    rank: null,
+    type: 'participant',
+  });
+
+  const [previewImage, setPreviewImage] = useState(null);
+  const [isDragActive, setIsDragActive] = useState(false);
+  const [selectedAvatarFile, setSelectedAvatarFile] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [userId, setuserId] = useState('');
+
+  // Fetch user data on mount
+  useEffect(() => {
+       const localAuthData = localStorage.getItem('authData');
+
+     if (localAuthData) {
+        try {
+          const parsedData = JSON.parse(localAuthData);
+          if (parsedData.userId) {
+            setuserId(parsedData.userId);
+       
+          }
+        } catch (error) {
+          console.error('Error parsing localStorage auth data:', error);
+        }
+      }
+    const fetchUserData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/get_user.php?id=${userId}`);
+        const result = await response.json();
+
+        if (result.success) {
+          setProfileData({
+            username: result.data.username || '',
+            email: result.data.email || '',
+            bio: result.data.bio || '',
+            avatar: result.data.avatar || '',
+            points: result.data.points || 0,
+            rank: result.data.rank || null,
+            type: result.data.type || 'participant',
+          });
+          
+          // Set preview image if avatar exists
+          if (result.data.avatar) {
+            setPreviewImage(process.env.NEXT_PUBLIC_BACKEND_URL + result.data.avatar);
+          }
+        } else {
+          setErrorMessage(result.message || 'Failed to load user data');
+        }
+      } catch (error) {
+        console.error('Error fetching user:', error);
+        setErrorMessage('Failed to connect to server');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (userId) {
+      fetchUserData();
+    }
+  }, [userId]);
+
+  const handleChange = (field, value) => {
+    setProfileData(prev => ({ ...prev, [field]: value }));
+    // Clear error for this field
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const handleImageUpload = async (eOrFile) => {
+    // Accept either an input event, a synthetic object with target.files,
+    // or a direct File object.
+    let file = null;
+    if (!eOrFile) return;
+    if (eOrFile.target && eOrFile.target.files) {
+      file = eOrFile.target.files[0];
+    } else if (eOrFile instanceof File) {
+      file = eOrFile;
+    } else if (eOrFile.dataTransfer && eOrFile.dataTransfer.files) {
+      file = eOrFile.dataTransfer.files[0];
+    }
+
+    if (!file) return;
+
+    // Validate size (5MB)
+    const maxBytes = 5 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      setUploadError('File is too large. Max size is 5MB.');
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setUploadError('Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.');
+      return;
+    }
+
+    // Clear previous errors and store file for upload-on-save
+    setUploadError('');
+    setSelectedAvatarFile(file);
+
+    // Show preview immediately
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewImage(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Drag handlers so dropping anywhere on the picture area works
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    setIsDragActive(true);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    setIsDragActive(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    // Only clear when leaving the container (not child elements)
+    setIsDragActive(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragActive(false);
+    const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file) {
+      // Reuse existing upload flow
+      handleImageUpload({ target: { files: [file] } });
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!profileData.username || profileData.username.trim().length < 3) {
+      newErrors.username = 'Username must be at least 3 characters';
+    }
+
+    if (!profileData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profileData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    if (profileData.bio && profileData.bio.length > 500) {
+      newErrors.bio = 'Bio cannot exceed 500 characters';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSave = async () => {
+    // Clear previous messages
+    setSuccessMessage('');
+    setErrorMessage('');
+
+    // Validate form
+    if (!validateForm()) {
+      setErrorMessage('Please fix the errors before saving');
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      // If there's a selected avatar file, upload it first
+      if (selectedAvatarFile) {
+        setIsUploadingAvatar(true);
+        try {
+          const formData = new FormData();
+          formData.append('avatar', selectedAvatarFile);
+          formData.append('user_id', userId);
+
+          const uploadResp = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/update_user2.php`, {
+            method: 'POST',
+            body: formData,
+          });
+
+          const uploadResult = await uploadResp.json();
+          if (uploadResult.success) {
+            // update avatar path in profileData so subsequent PUT sees new avatar
+            setProfileData(prev => ({ ...prev, avatar: uploadResult.data.avatar }));
+            setSelectedAvatarFile(null);
+          } else {
+            setUploadError(uploadResult.message || 'Failed to upload avatar');
+            setIsUploadingAvatar(false);
+            setIsSaving(false);
+            return; // abort save if avatar upload failed
+          }
+        } catch (err) {
+          console.error('Error uploading avatar:', err);
+          setUploadError('Failed to upload avatar. Please try again.');
+          setIsUploadingAvatar(false);
+          setIsSaving(false);
+          return; // abort save
+        } finally {
+          setIsUploadingAvatar(false);
+        }
+      }
+
+      // Proceed to update profile fields
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/update_user.php`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: userId,
+          username: profileData.username,
+          email: profileData.email,
+          bio: profileData.bio,
+          points: profileData.points,
+          rank: profileData.rank,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setSuccessMessage('Profile updated successfully!');
+        // Update local state with returned data
+        setProfileData(prev => ({
+          ...prev,
+          ...result.data
+        }));
+        // Update localStorage authData (robust): create or merge and notify
+        try {
+          console.debug('[UserProfileEdit] profile update result.data:', result.data);
+          const localAuthRaw = localStorage.getItem('authData');
+          console.debug('[UserProfileEdit] localAuthRaw before update:', localAuthRaw);
+          const localAuth = localAuthRaw ? JSON.parse(localAuthRaw) : {};
+
+          // Helper to pick the first defined value
+          const pick = (...vals) => vals.find(v => v !== undefined && v !== null);
+
+          const updatedAuth = {
+            ...localAuth,
+            username: pick(result.data?.username, profileData.username, localAuth.username),
+            userType: pick(result.data?.type, profileData.type, localAuth.userType),
+            avatarUrl: pick(result.data?.avatar, profileData.avatar, localAuth.avatarUrl),
+            email: pick(result.data?.email, profileData.email, localAuth.email),
+            points: pick(result.data?.points, profileData.points, localAuth.points, 0),
+            // backend might return id, userId or user_id
+            userId: pick(result.data?.id, result.data?.userId, result.data?.user_id, profileData.id, profileData.userId, localAuth.userId),
+            timestamp: Date.now(),
+          };
+
+          localStorage.setItem('authData', JSON.stringify(updatedAuth));
+          console.debug('[UserProfileEdit] authData updated:', updatedAuth);
+
+          // Dispatch a custom event so other parts of the app can react if needed
+          try {
+            window.dispatchEvent(new CustomEvent('authDataUpdated', { detail: updatedAuth }));
+          } catch (evtErr) {
+            // not critical
+            console.debug('Could not dispatch authDataUpdated event', evtErr);
+          }
+        } catch (err) {
+          console.error('Failed to update localStorage authData:', err);
+        }
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccessMessage(''), 3000);
+      } else {
+        setErrorMessage(result.message || 'Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setErrorMessage('Failed to connect to server');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="w-16 h-16 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-transparent text-white p-4 md:p-8 lg:p-12">
+      {/* Header */}
+      <div className="mb-8">
+        <ScannableTitle 
+          primaryText="EDIT PROFILE"
+          secondaryText="UPDATE YOUR INFORMATION"
+        />
+        <p className="text-gray-400 font-circular-web text-sm mt-4 max-w-3xl">
+          Manage your account settings and preferences. Keep your information up to date to 
+          connect better with your gaming community.
+        </p>
+      </div>
+
+      {/* Success/Error Messages */}
+      {successMessage && (
+        <div className="mb-6 p-4 bg-green-900/20 border-2 border-green-500/50 text-green-400 rounded">
+          {successMessage}
+        </div>
+      )}
+
+      {errorMessage && (
+        <div className="mb-6 p-4 bg-red-900/20 border-2 border-red-500/50 text-red-400 rounded">
+          {errorMessage}
+        </div>
+      )}
+
+      {/* Profile Picture Section */}
+      <div className="flex flex-col items-center mb-8 sm:mb-12">
+        <div className="relative mb-4 sm:mb-6 group">
+          <div className="absolute -top-1 sm:-top-2 -left-1 sm:-left-2 w-4 h-4 sm:w-6 sm:h-6 border-t-2 border-l-2 border-primary transition-all duration-300 group-hover:w-5 group-hover:h-5 sm:group-hover:w-8 sm:group-hover:h-8"></div>
+          <div className="absolute -top-1 sm:-top-2 -right-1 sm:-right-2 w-4 h-4 sm:w-6 sm:h-6 border-t-2 border-r-2 border-primary transition-all duration-300 group-hover:w-5 group-hover:h-5 sm:group-hover:w-8 sm:group-hover:h-8"></div>
+          <div className="absolute -bottom-1 sm:-bottom-2 -left-1 sm:-left-2 w-4 h-4 sm:w-6 sm:h-6 border-b-2 border-l-2 border-primary transition-all duration-300 group-hover:w-5 group-hover:h-5 sm:group-hover:w-8 sm:group-hover:h-8"></div>
+          <div className="absolute -bottom-1 sm:-bottom-2 -right-1 sm:-right-2 w-4 h-4 sm:w-6 sm:h-6 border-b-2 border-r-2 border-primary transition-all duration-300 group-hover:w-5 group-hover:h-5 sm:group-hover:w-8 sm:group-hover:h-8"></div>
+          
+          <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl sm:blur-2xl animate-pulse"></div>
+          
+          <div 
+            className={`relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 overflow-hidden transition-all duration-300 group-hover:scale-105 cursor-pointer ${isDragActive ? 'ring-4 ring-primary/40 scale-105' : ''}`}
+            style={{ clipPath: 'polygon(15% 0, 85% 0, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0 85%, 0 15%)' }}
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
+            <div className="w-full h-full bg-gradient-to-br from-primary/60 to-primary/80 border-2 sm:border-4 border-primary/50 flex items-center justify-center relative">
+              {/* Loading overlay */}
+              {isUploadingAvatar && (
+                <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-20">
+                  <Loader2 className="w-8 h-8 sm:w-12 sm:h-12 text-primary animate-spin" />
+                </div>
+              )}
+              
+              {previewImage ? (
+                <>
+                  <img 
+                    src={previewImage}
+                    alt="Profile preview" 
+                    className="w-full h-full object-cover" 
+                  />
+                  {/* Upload new photo overlay on hover */}
+                  <label className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer" onDragEnter={handleDragEnter} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
+                    <Camera className="w-8 h-8 sm:w-12 sm:h-12 text-white mb-2" />
+                    <span className="text-white text-xs sm:text-sm font-semibold">Change Photo</span>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      className="hidden" 
+                      onChange={handleImageUpload}
+                      disabled={isUploadingAvatar}
+                    />
+                  </label>
+                </>
+              ) : (
+                <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer" onDragEnter={handleDragEnter} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
+                  <Camera className="w-8 h-8 sm:w-12 sm:h-12 text-white mb-2" />
+                  <span className="text-white text-xs sm:text-sm font-semibold">Upload Photo</span>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    className="hidden" 
+                    onChange={handleImageUpload}
+                    disabled={isUploadingAvatar}
+                  />
+                </label>
+              )}
+            </div>
+            
+            <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,255,255,0.05)_2px,rgba(255,255,255,0.05)_4px)] pointer-events-none"></div>
+          </div>
+        </div>
+
+        <p className="text-gray-400 text-xs sm:text-sm text-center">
+          {isUploadingAvatar ? 'Uploading...' : 'Click or drag & drop to upload • Max 5MB'}
+        </p>
+        {uploadError && (
+          <p className="text-red-500 text-xs sm:text-sm text-center mt-2">{uploadError}</p>
+        )}
+      </div>
+
+      {/* Basic Information */}
+      <div className="relative inline-block px-1 w-full group mb-8">
+        <div className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-primary"></div>
+        <div className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-primary"></div>
+        
+        <div 
+          className="relative overflow-hidden"
+          style={{ clipPath: 'polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)' }}
+        >
+          <div className="relative border-2 border-gray-800 p-6">
+            <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_1px,rgba(255,255,255,0.02)_1px,rgba(255,255,255,0.02)_2px)] opacity-50"></div>
+            
+            <h2 className="relative z-10 text-2xl font-zentry text-primary mb-6 uppercase tracking-wider">Basic Information</h2>
+            
+            <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FuturisticInput
+                label="Username"
+                icon={User}
+                value={profileData.username}
+                onChange={(e) => handleChange('username', e.target.value)}
+                error={errors.username}
+              />
+
+              <FuturisticInput
+                label="Email"
+                icon={Mail}
+                type="email"
+                value={profileData.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                error={errors.email}
+              />
+
+              <FuturisticInput
+                label="Points"
+                type="number"
+                value={profileData.points}
+                onChange={(e) => handleChange('points', parseInt(e.target.value) || 0)}
+                disabled
+              />
+
+              <FuturisticInput
+                label="Rank"
+                type="number"
+                value={profileData.rank || ''}
+                onChange={(e) => handleChange('rank', parseInt(e.target.value) || null)}
+              />
+
+              <div className="md:col-span-2">
+                <FuturisticTextarea
+                  label="Bio"
+                  value={profileData.bio}
+                  onChange={(e) => handleChange('bio', e.target.value)}
+                  rows={4}
+                  maxLength={500}
+                  error={errors.bio}
+                />
+                <p className="text-gray-500 text-xs mt-2 ml-2">
+                  {profileData.bio.length}/500 characters
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row items-center justify-end gap-4">
+        <div className="relative inline-block px-1 w-full sm:w-auto">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-primary rounded blur opacity-75"></div>
+          <div 
+            className="relative overflow-hidden transition-all duration-300 hover:scale-105"
+            style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+          >
+            <button 
+              onClick={handleSave}
+              disabled={isSaving}
+              className="relative w-full bg-gradient-to-r from-primary to-primary text-black px-8 py-3 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,255,255,0.1)_2px,rgba(255,255,255,0.1)_4px)] opacity-50"></div>
+              {isSaving ? (
+                <>
+                  <Loader2 size={20} className="relative z-10 animate-spin" />
+                  <span className="relative z-10 font-bold uppercase tracking-wider">Saving...</span>
+                </>
+              ) : (
+                <>
+                  <Save size={20} className="relative z-10" />
+                  <span className="relative z-10 font-bold uppercase tracking-wider">Save Changes</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default UserProfileEdit;

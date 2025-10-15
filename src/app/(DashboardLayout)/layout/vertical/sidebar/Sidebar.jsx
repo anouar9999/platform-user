@@ -29,7 +29,7 @@ const menuItems = [
   { id: 1, icon: TbTournament , name: 'Tournaments', href: '/tournaments' },
   { id: 2, icon: Medal, name: 'My Tournament', href: '/my-tournaments' },
   { id: 3, icon: Users2, name: 'Teams', href: '/teams' },
-  { id: 4, icon: IoIosStats , name: 'Stats', href: '/settings' },
+  { id: 4, icon: IoIosStats , name: 'Stats', href: '/stats' },
 ];
 
 const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {

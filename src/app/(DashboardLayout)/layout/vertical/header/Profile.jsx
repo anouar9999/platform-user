@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Backpack, ChevronDown, LogOut } from 'lucide-react';
+import { Backpack, ChevronDown, LogOut, Settings } from 'lucide-react';
 
 const ProfileDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -316,7 +316,22 @@ const ProfileDropdown = () => {
                   </span>
                 </div>
               </a>
-              
+               <a
+                href={`${process.env.NEXT_PUBLIC_FRONTEND_URL}/settings`}
+                className="group/item relative flex items-center justify-between px-3 py-2 text-sm transition-all duration-300 overflow-hidden"
+                role="menuitem"
+              >
+                <div className="absolute inset-0 bg-white/0 group-hover/item:bg-white/5 border-l-2 border-transparent group-hover/item:border-green-500/50 transition-all duration-300" />
+                
+                <div className="relative z-10 flex items-center gap-2">
+                  <div className="w-6 h-6 bg-green-500/20 border border-yellow-500/40 flex items-center justify-center transform -skew-x-6 group-hover/item:bg-green-500/30 transition-all duration-300">
+                    <Settings className="h-3 w-3 text-yellow-400 transform skew-x-6" />
+                  </div>
+                  <span className="text-gray-300 group-hover/item:text-white font-bold uppercase text-xs tracking-wider">
+                    Settings
+                  </span>
+                </div>
+              </a>
               {/* Sign Out Button */}
               <button
                 className="group/item relative flex w-full items-center justify-between px-3 py-2 text-sm transition-all duration-300 overflow-hidden"
