@@ -4,7 +4,7 @@ const TeamCard = ({ team, onClick, isInMyTeams }) => {
   const memberCount = team.members?.length || 0;
   const matches = team.stats?.matches || 0;
   const avgSkillLevel = team.stats?.avgSkillLevel || 0;
-  const organizerName = team.owner_username || 'Team Owner';
+  const organizerName = team.owner_username ;
 
   return (
     <div

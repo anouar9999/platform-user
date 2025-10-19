@@ -126,7 +126,7 @@ const Profile = () => {
                       style={{ clipPath: 'polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)' }}
                     >
                       <img 
-                        src={user.avatar ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${user.avatar}` : `data:image/svg+xml,${encodeURIComponent(defaultAvatarSvg)}`}
+                        src={user.avatar ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api${user.avatar}` : `data:image/svg+xml,${encodeURIComponent(defaultAvatarSvg)}`}
                         alt={user.username} 
                         className="w-full h-full object-cover"
                       />

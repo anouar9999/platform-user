@@ -258,7 +258,7 @@ const ProfileDropdown = () => {
                 src={
                   avatarUrl.startsWith('http') 
                     ? avatarUrl 
-                    : `${process.env.NEXT_PUBLIC_BACKEND_URL}${avatarUrl}`
+                    : `${process.env.NEXT_PUBLIC_BACKEND_URL}/api${avatarUrl}`
                 }
                 alt={userName}
                 className="w-full h-full object-cover"
@@ -283,13 +283,9 @@ const ProfileDropdown = () => {
             {/* Avatar */}
             <div className="relative w-9 h-9 flex-shrink-0 transform -skew-x-6 border border-primary/40 overflow-hidden bg-black/40">
               <div className="transform skew-x-6 w-full h-full">
-                {avatarUrl && !imageError ? (
+                {avatarUrl  ? (
                   <img
-                    src={
-                      avatarUrl.startsWith('http') 
-                        ? avatarUrl 
-                        : `${process.env.NEXT_PUBLIC_BACKEND_URL}${avatarUrl}`
-                    }
+                    src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/api${avatarUrl}`}
                     alt={userName}
                     className="w-full h-full object-cover"
                     onError={() => setImageError(true)}
