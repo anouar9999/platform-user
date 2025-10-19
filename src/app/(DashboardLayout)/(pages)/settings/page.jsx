@@ -326,7 +326,7 @@ const UserProfileEdit = () => {
           formData.append('avatar', selectedAvatarFile);
           formData.append('user_id', userId);
 
-          const uploadResp = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/update_user2.php`, {
+          const uploadResp = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/update_user.php`, {
             method: 'POST',
             body: formData,
           });

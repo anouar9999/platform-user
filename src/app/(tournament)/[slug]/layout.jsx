@@ -22,18 +22,12 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation'; // Add this import for navigation
 import TournamentJoinButton from './TournamentJoinButton';
 import TournamentStats from './TournamentStats';
+import createDatabaseNotification from '@/utils/notifications';
 
 // Loading Component
 
 
-// Helper Functions
-const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-};
+
 
 // Main Layout Content Component
 const LayoutContent = ({ children }) => {
@@ -71,81 +65,117 @@ const LayoutContent = ({ children }) => {
     joinTournament(teamId);
   };
 
-  const joinTournament = async (teamId = null) => {
-    setIsJoining(true);
- const userDataString = localStorage.getItem("authData");
-const userData = JSON.parse(userDataString);
+// Updated joinTournament function (NO EMOJIS)
+const joinTournament = async (teamId = null) => {
+  setIsJoining(true);
+  const userDataString = localStorage.getItem("authData");
+  const userData = JSON.parse(userDataString);
+  const userId = userData?.userId;
 
-    const userId = userData?.userId ;
-	console.log(userId)
-    try {
-      if (!userId) {
-        addToast({
-          type: 'error',
-          message: 'Please login to join the tournament',
-          duration: 5000,
-          position: 'bottom-right',
-        });
-        return;
-      }
-
-      if (!tournament?.id) {
-        throw new Error('Invalid tournament data');
-      }
-
-      const requestBody = {
-        tournament_id: tournament.id,
-        user_id: parseInt(userId),
-        ...(teamId && { team_id: parseInt(teamId) }),
-      };
-
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user_join_tournament.php`,
-        requestBody,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        },
-      );
-
-      const { data } = response;
-
-      if (data.success) {
-        addToast({
-          type: 'success',
-          message: data.message || 'Successfully joined the tournament!',
-          duration: 5000,
-          position: 'bottom-right',
-        });
-        setHasJoined(true);
-        return true;
-      }
-
-      throw new Error(data.message || 'Failed to join the tournament');
-    } catch (error) {
-      console.error('Error joining tournament:', error);
-
-      let errorMessage = 'An error occurred while joining the tournament';
-      if (error.response) {
-        errorMessage = error.response.data?.message || errorMessage;
-      } else if (error.request) {
-        errorMessage = 'Unable to reach the server. Please check your connection.';
-      } else {
-        errorMessage = error.message || errorMessage;
-      }
-
+  try {
+    if (!userId) {
       addToast({
         type: 'error',
-        message: errorMessage,
+        message: 'Please login to join the tournament',
         duration: 5000,
         position: 'bottom-right',
       });
       return false;
-    } finally {
-      setIsJoining(false);
     }
-  };
+
+    if (!tournament?.id) {
+      throw new Error('Invalid tournament data');
+    }
+
+    const requestBody = {
+      tournament_id: tournament.id,
+      user_id: parseInt(userId),
+      ...(teamId && { team_id: parseInt(teamId) }),
+    };
+
+    console.log('Joining tournament:', requestBody);
+
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user_join_tournament.php`,
+      requestBody,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    const { data } = response;
+
+    if (data.success) {
+      // SUCCESS MESSAGE - NO EMOJIS
+      const successMessage = teamId 
+        ? `Successfully joined "${tournament.name}" with your team!`
+        : `Successfully registered for "${tournament.name}"!`;
+      
+      addToast({
+        type: 'success',
+        message: successMessage,
+        duration: 6000,
+        position: 'bottom-right',
+      });
+
+      // CREATE DATABASE NOTIFICATION - NO EMOJIS
+      console.log('Creating notification for user:', userId);
+      const notificationMessage = teamId
+        ? `You have successfully joined "${tournament.name}" tournament with your team. Good luck!`
+        : `You have successfully registered for "${tournament.name}" tournament. Get ready to compete!`;
+      
+      const notificationCreated = await createDatabaseNotification(
+        userId, 
+        notificationMessage,
+        'Tournament System'
+      );
+
+      if (notificationCreated) {
+        console.log('Notification sent successfully');
+      } else {
+        console.warn('Failed to send notification, but tournament join was successful');
+      }
+
+      setHasJoined(true);
+      
+      if (slug) {
+        await fetchTournament(slug);
+      }
+
+      return true;
+    }
+
+    throw new Error(data.message || 'Failed to join the tournament');
+    
+  } catch (error) {
+    console.error('Error joining tournament:', error);
+
+    let errorMessage = 'An error occurred while joining the tournament';
+    
+    if (error.response) {
+      errorMessage = error.response.data?.message || errorMessage;
+      console.error('Server error:', error.response.data);
+    } else if (error.request) {
+      errorMessage = 'Unable to reach the server. Please check your connection.';
+      console.error('Network error:', error.request);
+    } else {
+      errorMessage = error.message || errorMessage;
+    }
+
+    addToast({
+      type: 'error',
+      message: errorMessage,
+      duration: 5000,
+      position: 'bottom-right',
+    });
+    
+    return false;
+  } finally {
+    setIsJoining(false);
+  }
+};
 
   // Status Badge Component
   // Status Badge Component
@@ -512,11 +542,11 @@ const userData = JSON.parse(userDataString);
           {tournament && (
             <div className="relative w-full h-full">
               <img
-                src={`https://framerusercontent.com/images/t7ZowO33lGwkXjvFtZPiTbxFwc.jpg?scale-down-to=1024`}
+                src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${tournament.featured_image}`}
                 alt="Tournament Background"
                 className="w-full h-full object-cover absolute inset-0"
               />
-              <div className="absolute inset-0 bg-gradient-to-b from-secondary/20 via-secondary/90 to-secondary"></div>
+              <div className="absolute inset-0 bg-gradient-to-b from-secondary/20 via-secondary to-secondary"></div>
             </div>
           )}
         </div>
