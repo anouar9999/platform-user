@@ -200,7 +200,7 @@ const SingleTournament = ({ tournamentId }) => {
                   >
                     {team.avatar ? (
                       <img 
-                        src={team.avatar} 
+                        src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${team.avatar}`} 
                         alt={team.name}
                         className="w-full h-full object-cover"
                       />

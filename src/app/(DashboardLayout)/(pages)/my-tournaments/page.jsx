@@ -28,9 +28,9 @@ const ParticipantTournaments = ({ participantId }) => {
     setUserId(parsedData.userId);
     console.log("User ID:", parsedData.userId);
 
-    if (user_id) {
+    if (true) {
       setIsLoading(true);
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/my-tournament.php?user_id=${user_id}`)
+      fetch(`https://api.gnews.ma/api/my-tournament.php?user_id=${parsedData.userId}`)
         .then((response) => {
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -39,8 +39,8 @@ const ParticipantTournaments = ({ participantId }) => {
         })
         .then((data) => {
           if (data.success) {
-            console.log("Retrieved tournaments:", data.tournaments);
-            setTournaments(data.tournaments);
+            console.log("Retrieved tournaments:", data);
+            setTournaments(data.data.tournaments);
             setFilteredTournaments(data.tournaments);
           } else {
             setError(data.message || 'Échec de la récupération des tournois du participant');
