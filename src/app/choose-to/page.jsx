@@ -1,4 +1,4 @@
-"use client"
+'use client';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -33,76 +33,89 @@ const AnimatedCards = () => {
   // Memoized card data to prevent unnecessary re-renders
   const allCards = useMemo(() => {
     if (!userData) return [];
-    
+
     return [
       {
-        image: "images/20250523_2358_Abstract_Game_Landscapes_simple_compose_01jvzjcqsyesps0bxff567n5cb.png",
-        title: "Home",
-        description: "Welcome to your gaming hub. Start your journey here with everything you need to get started.",
-	 link: `https://gamius.ma/`,
-        enabled: true
+        image:
+          'images/20250523_2358_Abstract_Game_Landscapes_simple_compose_01jvzjcqsyesps0bxff567n5cb.png',
+        title: 'Home',
+        description:
+          'Welcome to your gaming hub. Start your journey here with everything you need to get started.',
+        link: `https://gamius.ma/`,
+        enabled: true,
       },
       {
-        image: "images/20250523_2358_Abstract_Game_Landscapes_simple_compose_01jvzjcqszezdbheaacge7fqcv.png",
-        title: "Dashboard",
-        description: "Track your progress, view statistics, and manage your gaming profile in one place.",
+        image:
+          'images/20250523_2358_Abstract_Game_Landscapes_simple_compose_01jvzjcqszezdbheaacge7fqcv.png',
+        title: 'Dashboard',
+        description:
+          'Track your progress, view statistics, and manage your gaming profile in one place.',
         link: `/tournaments`,
-        enabled: true
+        enabled: true,
       },
       {
-        image: "/images/20250523_2358_Abstract_Game_Landscapes_simple_compose_01jvzjcqswfmd94yy93n5kb079.png",
-        title: "News",
-        description: "Stay updated with the latest gaming news, updates, and community highlights.",
-        link: "/news",
-        enabled: false
+        image:
+          '/images/20250523_2358_Abstract_Game_Landscapes_simple_compose_01jvzjcqswfmd94yy93n5kb079.png',
+        title: 'News',
+        description: 'Stay updated with the latest gaming news, updates, and community highlights.',
+        link: '/news',
+        enabled: false,
       },
       {
-        image: "/images/20250523_2358_Abstract_Game_Landscapes_simple_compose_01jvzjcqsxe5abjekq77rs6at2.png",
-        title: "Shop",
-        description: "Browse our collection of gaming gear, accessories, and digital content.",
-        link: "/shop",
-        enabled: false
-      }
+        image:
+          '/images/20250523_2358_Abstract_Game_Landscapes_simple_compose_01jvzjcqsxe5abjekq77rs6at2.png',
+        title: 'Shop',
+        description: 'Browse our collection of gaming gear, accessories, and digital content.',
+        link: '/shop',
+        enabled: false,
+      },
     ];
   }, [userData]);
 
   // Optimized card click handler
-  const handleCardClick = useCallback((card) => {
-    if (card.enabled && card.link) {
-      router.push(card.link);
-    }
-  }, [router]);
+  const handleCardClick = useCallback(
+    (card) => {
+      if (card.enabled && card.link) {
+        router.push(card.link);
+      }
+    },
+    [router],
+  );
 
   // Early return if no user data
   if (!userData) {
     return (
-      <div style={{
-        backgroundColor: '#263238',
-        height: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: 'white',
-        fontSize: '1.2rem'
-      }}>
+      <div
+        style={{
+          backgroundColor: '#263238',
+          height: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'white',
+          fontSize: '1.2rem',
+        }}
+      >
         Loading...
       </div>
     );
   }
 
   return (
-    <div style={{
-      backgroundColor: '#263238',
-      fontFamily: 'Merriweather, serif',
-      color: 'white',
-      height: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexWrap: 'wrap',
-      overflow: 'hidden',
-      position: 'relative'
-    }}>
+    <div
+      style={{
+        backgroundColor: '#263238',
+        fontFamily: 'Merriweather, serif',
+        color: 'white',
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexWrap: 'wrap',
+        overflow: 'hidden',
+        position: 'relative',
+      }}
+    >
       {/* Vertical Title */}
       <div
         className="font-free-fire"
@@ -117,7 +130,6 @@ const AnimatedCards = () => {
           textTransform: 'uppercase',
           whiteSpace: 'nowrap',
           transition: 'opacity 0.8s ease 1.5s',
-
         }}
       >
         Choose Your Direction
@@ -149,7 +161,7 @@ const Card = React.memo(({ card, index, animated, onClick }) => {
     filter: 'brightness(1) blur(0px)',
     zIndex: 10,
     position: 'relative',
-    opacity: card.enabled ? 1 : 0.7
+    opacity: card.enabled ? 1 : 0.7,
   };
 
   const imgWrapperStyle = {
@@ -157,7 +169,7 @@ const Card = React.memo(({ card, index, animated, onClick }) => {
     transform: 'translate(50px, 0)',
     height: animated ? '100vh' : '0px',
     transition: 'height 1s ease 1s, background-color 1s ease 1s',
-    overflow: 'hidden'
+    overflow: 'hidden',
   };
 
   const imgStyle = {
@@ -166,25 +178,16 @@ const Card = React.memo(({ card, index, animated, onClick }) => {
     objectFit: 'cover',
     opacity: animated ? 1 : 0,
     transition: 'opacity 0.5s ease 2s, transform 0.4s ease',
-    transform: card.enabled ? 'scale(1.1)' : 'scale(1)'
+    transform: card.enabled ? 'scale(1.1)' : 'scale(1)',
   };
 
   return (
     <div className="card" onClick={onClick} style={cardStyle}>
-      
       <div className="img-wrapper" style={imgWrapperStyle}>
-        <img
-          className="img"
-          src={card.image}
-          alt={card.title}
-          style={imgStyle}
-          loading="lazy"
-        />
+        <img className="img" src={card.image} alt={card.title} style={imgStyle} loading="lazy" />
 
         {/* Disabled overlay */}
-        {!card.enabled && (
-          <DisabledOverlay />
-        )}
+        {!card.enabled && <DisabledOverlay />}
 
         {/* Bottom gradient overlay - only for enabled cards */}
         {card.enabled && (
@@ -202,7 +205,7 @@ const Card = React.memo(({ card, index, animated, onClick }) => {
               transform: 'translateY(0%)',
               transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
               pointerEvents: 'none',
-              zIndex: 5
+              zIndex: 5,
             }}
           />
         )}
@@ -217,7 +220,7 @@ const Card = React.memo(({ card, index, animated, onClick }) => {
               right: 0,
               bottom: 0,
               transition: 'background 0.3s ease',
-              pointerEvents: 'none'
+              pointerEvents: 'none',
             }}
           />
         )}
@@ -236,26 +239,28 @@ Card.displayName = 'Card';
 
 // Extracted components for better readability
 const DisabledOverlay = React.memo(() => (
-  <div style={{
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'rgba(0, 0, 0, 0.6)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 25
-  }}>
-    <div 
-      className='font-valorant tracking-widest' 
+  <div
+    style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0, 0, 0, 0.6)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 25,
+    }}
+  >
+    <div
+      className="font-valorant tracking-widest"
       style={{
         padding: '10px 20px',
         borderRadius: '4px',
         fontSize: '1.2rem',
         fontWeight: 'bold',
-        transform: 'rotate(-10deg)'
+        transform: 'rotate(-10deg)',
       }}
     >
       Coming Soon
@@ -266,7 +271,7 @@ DisabledOverlay.displayName = 'DisabledOverlay';
 
 const CardTitle = React.memo(({ title }) => (
   <div
-    className='font-free-fire text-orange-mge'
+    className="font-free-fire text-orange-mge"
     style={{
       position: 'absolute',
       right: '20%',
@@ -283,7 +288,7 @@ const CardTitle = React.memo(({ title }) => (
       letterSpacing: '3px',
       textTransform: 'uppercase',
       textShadow: '2px 2px 4px rgba(0,0,0,0.3), 0 0 10px rgba(187, 170, 221, 0.5)',
-      zIndex: 20
+      zIndex: 20,
     }}
   >
     {title}
@@ -304,12 +309,10 @@ const CardDescription = React.memo(({ description }) => (
       transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       opacity: 1,
       zIndex: 20,
-      transform: 'translateY(0)'
+      transform: 'translateY(0)',
     }}
   >
-    <p className="text-lg font-ea-football text-white mb-2">
-      {description}
-    </p>
+    <p className="text-lg font-ea-football text-white mb-2">{description}</p>
   </div>
 ));
 CardDescription.displayName = 'CardDescription';
@@ -362,7 +365,7 @@ export default AnimatedCards;
 //   const [currentIndex, setCurrentIndex] = useState(0);
 //   const [direction, setDirection] = useState(0);
 //   const router = useRouter();
-  
+
 //   // Touch handling refs
 //   const touchStartX = useRef(0);
 //   const touchEndX = useRef(0);
@@ -372,7 +375,7 @@ export default AnimatedCards;
 //     if (userId) {
 //       setIsLoading(false);
 //     }
-    
+
 //     const timer = setTimeout(() => setIsAnimated(true), 100);
 //     return () => clearTimeout(timer);
 //   }, [userId]);
@@ -394,7 +397,7 @@ export default AnimatedCards;
 
 //   const handleCardClick = useCallback((card) => {
 //     if (!card.enabled || !card.link) return;
-    
+
 //     if (card.link.startsWith('http')) {
 //       window.location.href = card.link;
 //     } else {
@@ -415,10 +418,10 @@ export default AnimatedCards;
 
 //   const handleTouchEnd = useCallback(() => {
 //     if (!isDragging.current) return;
-    
+
 //     const swipeDistance = touchStartX.current - touchEndX.current;
 //     const minSwipeDistance = 50;
-    
+
 //     if (Math.abs(swipeDistance) > minSwipeDistance) {
 //       if (swipeDistance > 0) {
 //         nextSlide();
@@ -426,7 +429,7 @@ export default AnimatedCards;
 //         prevSlide();
 //       }
 //     }
-    
+
 //     isDragging.current = false;
 //     touchStartX.current = 0;
 //     touchEndX.current = 0;
@@ -446,24 +449,24 @@ export default AnimatedCards;
 //   const getCardPosition = (index) => {
 //     const diff = index - currentIndex;
 //     const totalCards = CARD_CONFIG.length;
-    
+
 //     let normalizedDiff = diff;
 //     if (Math.abs(diff) > totalCards / 2) {
 //       normalizedDiff = diff > 0 ? diff - totalCards : diff + totalCards;
 //     }
-    
+
 //     return normalizedDiff;
 //   };
 
 //   return (
-//     <div 
+//     <div
 //       className="min-h-screen bg-[#263238] flex items-center justify-center overflow-hidden relative touch-none"
 //       onTouchStart={handleTouchStart}
 //       onTouchMove={handleTouchMove}
 //       onTouchEnd={handleTouchEnd}
 //     >
 //       <PageTitle isAnimated={isAnimated} />
-      
+
 //       {/* Carousel Container */}
 //       <div className="relative w-full h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
 //         {/* Cards */}
@@ -472,7 +475,7 @@ export default AnimatedCards;
 //             const position = getCardPosition(index);
 //             const isCenter = position === 0;
 //             const isVisible = Math.abs(position) <= 2;
-            
+
 //             return (
 //               <Card
 //                 key={card.id}
@@ -494,13 +497,13 @@ export default AnimatedCards;
 //         </div>
 
 //         {/* Navigation Buttons */}
-//         <NavigationButton 
-//           direction="left" 
+//         <NavigationButton
+//           direction="left"
 //           onClick={prevSlide}
 //           isAnimated={isAnimated}
 //         />
-//         <NavigationButton 
-//           direction="right" 
+//         <NavigationButton
+//           direction="right"
 //           onClick={nextSlide}
 //           isAnimated={isAnimated}
 //         />
@@ -552,7 +555,7 @@ export default AnimatedCards;
 //     const scale = isCenter ? 1 : (window.innerWidth < 640 ? 0.75 : 0.7);
 //     const opacity = isVisible ? (isCenter ? 1 : 0.5) : 0;
 //     const zIndex = isCenter ? 50 : 40 - Math.abs(position);
-    
+
 //     return {
 //       transform: `translateX(${baseTranslate}px) scale(${scale}) skewX(-10deg)`,
 //       opacity: opacity,
@@ -584,22 +587,22 @@ export default AnimatedCards;
 //           // borderRadius: 'clamp(8px, 2vw, 12px)'
 //         }}
 //       >
-//         <CardImage 
-//           src={card.image} 
-//           alt={card.title} 
+//         <CardImage
+//           src={card.image}
+//           alt={card.title}
 //           isAnimated={isAnimated}
 //           isEnabled={card.enabled}
 //           isHovered={isHovered && isCenter}
 //         />
-        
+
 //         {!card.enabled && <DisabledOverlay />}
 //         {card.enabled && <GradientOverlay isHovered={isHovered && isCenter} />}
-        
+
 //         <CardTitle title={card.title} isHovered={isHovered && isCenter} isCenter={isCenter} />
 //         {card.enabled && isCenter && (
-//           <CardDescription 
-//             description={card.description} 
-//             isHovered={isHovered} 
+//           <CardDescription
+//             description={card.description}
+//             isHovered={isHovered}
 //           />
 //         )}
 //       </div>
@@ -627,7 +630,7 @@ export default AnimatedCards;
 
 // const DisabledOverlay = React.memo(() => (
 //   <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-25">
-//     <div 
+//     <div
 //       className="px-4 sm:px-5 py-2 sm:py-2.5  text-base sm:text-xl font-bold tracking-widest text-white"
 //       style={{ transform: 'rotate(-10deg)' }}
 //     >
@@ -689,7 +692,7 @@ export default AnimatedCards;
 
 // const NavigationButton = ({ direction, onClick, isAnimated }) => {
 //   const isLeft = direction === 'left';
-  
+
 //   return (
 //     <button
 //       onClick={onClick}
