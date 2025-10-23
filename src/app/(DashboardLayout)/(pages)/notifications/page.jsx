@@ -117,7 +117,7 @@ const EmptyState = () => (
           No Notifications
         </h3>
         <p className="text-gray-500 font-circular-web text-sm sm:text-base">
-          You're all caught up! Check back later for updates.
+          You re all caught up! Check back later for updates.
         </p>
       </div>
     </div>

@@ -28,9 +28,9 @@ const ParticipantTournaments = ({ participantId }) => {
     setUserId(parsedData.userId);
     console.log("User ID:", parsedData.userId);
 
-    if (user_id) {
+    if (true) {
       setIsLoading(true);
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/my-tournament.php?user_id=${user_id}`)
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/my-tournament.php?user_id=${parsedData.userId}`)
         .then((response) => {
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -39,7 +39,7 @@ const ParticipantTournaments = ({ participantId }) => {
         })
         .then((data) => {
           if (data.success) {
-            console.log("Retrieved tournaments:", data.tournaments);
+            console.log("Retrieved tournaments:", data);
             setTournaments(data.tournaments);
             setFilteredTournaments(data.tournaments);
           } else {

@@ -54,7 +54,7 @@ const SingleTournament = ({ tournamentId }) => {
 
       // Format matches for display
       formatMatches(result.data);
-      
+
       setLoading(false);
     } catch (err) {
       console.error('Error fetching tournament data:', err);
@@ -74,7 +74,7 @@ const SingleTournament = ({ tournamentId }) => {
 
     // Sort matches by round and position
     const matchesByRound = {};
-    data.matches.forEach(match => {
+    data.matches.forEach((match) => {
       const round = parseInt(match.round);
       if (!matchesByRound[round]) {
         matchesByRound[round] = [];
@@ -83,7 +83,7 @@ const SingleTournament = ({ tournamentId }) => {
     });
 
     // Sort matches by position within each round
-    Object.keys(matchesByRound).forEach(round => {
+    Object.keys(matchesByRound).forEach((round) => {
       matchesByRound[round].sort((a, b) => parseInt(a.position) - parseInt(b.position));
     });
 
@@ -110,10 +110,12 @@ const SingleTournament = ({ tournamentId }) => {
         seeds: roundMatches.map((match) => ({
           id: match.id,
           status: match.status,
-          teams: (match.teams || [
-            { name: 'TBD', score: 0, winner: false },
-            { name: 'TBD', score: 0, winner: false },
-          ]).map((team) => ({
+          teams: (
+            match.teams || [
+              { name: 'TBD', score: 0, winner: false },
+              { name: 'TBD', score: 0, winner: false },
+            ]
+          ).map((team) => ({
             id: team.id || `team-${Math.random()}`,
             name: team.name || 'TBD',
             score: team.score || 0,
@@ -131,7 +133,7 @@ const SingleTournament = ({ tournamentId }) => {
       const finalRound = formattedRounds[formattedRounds.length - 1];
       if (finalRound.seeds.length > 0) {
         const finalMatch = finalRound.seeds[0];
-        const winner = finalMatch.teams.find(team => team.winner);
+        const winner = finalMatch.teams.find((team) => team.winner);
         if (winner && winner.name !== 'TBD') {
           setChampion(winner);
         }
@@ -142,7 +144,8 @@ const SingleTournament = ({ tournamentId }) => {
   const getRoundTitle = (round, totalRounds) => {
     if (round === totalRounds - 1) return <span className="font-bold text-2xl">Finals</span>;
     if (round === totalRounds - 2) return <span className="font-bold text-2xl">Semi Finals</span>;
-    if (round === totalRounds - 3) return <span className="font-bold text-2xl">Quarter Finals</span>;
+    if (round === totalRounds - 3)
+      return <span className="font-bold text-2xl">Quarter Finals</span>;
     if (round === totalRounds - 4) return <span className="font-bold text-2xl">Round of 16</span>;
     if (round === totalRounds - 5) return <span className="font-bold text-2xl">Round of 32</span>;
     return `Round ${round + 1}`;
@@ -153,7 +156,7 @@ const SingleTournament = ({ tournamentId }) => {
     const isTBD = (team) => !team.name || team.name === 'TBD';
     const isPartOfJourney =
       hoveredParticipant && seed.teams.some((team) => team.name === hoveredParticipant);
-    
+
     return (
       <Seed>
         <SeedItem>
@@ -199,8 +202,8 @@ const SingleTournament = ({ tournamentId }) => {
                     `}
                   >
                     {team.avatar ? (
-                      <img 
-                        src={team.avatar} 
+                      <img
+                        src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${team.avatar}`}
                         alt={team.name}
                         className="w-full h-full object-cover"
                       />
@@ -296,8 +299,6 @@ const SingleTournament = ({ tournamentId }) => {
   return (
     <div className="min-h-screen w-full  p-4">
       <div className="max-w-6xl mx-auto">
-        
-        
         <div className="w-full h-full rounded-xl p-4 shadow-lg">
           {loading ? (
             <div className="min-h-[400px] flex items-center justify-center text-gray-400">
@@ -305,37 +306,34 @@ const SingleTournament = ({ tournamentId }) => {
               <span>Loading tournament bracket...</span>
             </div>
           ) : error ? (
-              <div className="relative max-w-md mx-auto my-12">
-        {/* Decorative corners */}
-        <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-primary"></div>
-        <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-primary"></div>
-        <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-primary"></div>
-        <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-primary"></div>
+            <div className="relative max-w-md mx-auto my-12">
+              {/* Decorative corners */}
+              <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-primary"></div>
+              <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-primary"></div>
+              <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-primary"></div>
+              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-primary"></div>
 
-        <div className="bg-black/40 border border-white/10 p-8 text-center">
-          {/* Scanline effect */}
-          <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,61,8,0.02)_2px,rgba(255,61,8,0.02)_4px)] opacity-50"></div>
+              <div className="bg-black/40 border border-white/10 p-8 text-center">
+                {/* Scanline effect */}
+                <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,61,8,0.02)_2px,rgba(255,61,8,0.02)_4px)] opacity-50"></div>
 
-          <div className="relative z-10">
-            <div className="w-16 h-16 flex items-center justify-center mx-auto mb-4 transform -skew-x-6">
-              <Brackets className="text-primary w-8 h-8 transform skew-x-6" />
-             
+                <div className="relative z-10">
+                  <div className="w-16 h-16 flex items-center justify-center mx-auto mb-4 transform -skew-x-6">
+                    <Brackets className="text-primary w-8 h-8 transform skew-x-6" />
+                  </div>
+
+                  <h3 className="text-xl font-zentry text-white mb-3 uppercase tracking-wider">
+                    {error}
+                  </h3>
+
+                  <div className="flex items-center justify-center gap-2 mb-4">
+                    <div className="h-px w-8 bg-primary"></div>
+                    <div className="h-1 w-1 bg-primary transform rotate-45"></div>
+                    <div className="h-px w-8 bg-primary"></div>
+                  </div>
+                </div>
+              </div>
             </div>
-
-            <h3 className="text-xl font-zentry text-white mb-3 uppercase tracking-wider">
-             {error}
-            </h3>
-
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <div className="h-px w-8 bg-primary"></div>
-              <div className="h-1 w-1 bg-primary transform rotate-45"></div>
-              <div className="h-px w-8 bg-primary"></div>
-            </div>
-
-           
-          </div>
-        </div>
-      </div>
           ) : (
             <div className="w-full overflow-x-auto pb-8">
               <Bracket

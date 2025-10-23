@@ -449,8 +449,8 @@ const onSubmit = async (data) => {
                       </div>
                     </div>
 
-                    <motion.div variants={formItemVariants} className="grid grid-cols-4 gap-3 sm:gap-6">
-                      <button
+                    <motion.div variants={formItemVariants} className="grid grid-cols-1 place-items-center mx-auto ">
+                      {/* <button
                         type="button"
                         className="flex items-center justify-center p-2 bg-white hover:bg-gray-100 transition-colors rounded"
                       >
@@ -459,8 +459,8 @@ const onSubmit = async (data) => {
                           alt="Facebook"
                           className="w-5 h-5 sm:w-6 sm:h-6"
                         />
-                      </button>
-                      <button
+                      </button> */}
+                      {/* <button
                         type="button"
                         className="flex items-center justify-center p-2 bg-white hover:bg-gray-100 transition-colors rounded"
                       >
@@ -469,7 +469,7 @@ const onSubmit = async (data) => {
                           alt="Riot"
                           className="w-5 h-5 sm:w-6 sm:h-6"
                         />
-                      </button>
+                      </button> */}
                       <button
                         type="button"
                         className="flex items-center justify-center p-2 bg-white hover:bg-gray-100 transition-colors rounded"
@@ -480,7 +480,7 @@ const onSubmit = async (data) => {
                           className="w-5 h-5 sm:w-6 sm:h-6"
                         />
                       </button>
-                      <button
+                      {/* <button
                         type="button"
                         className="flex items-center justify-center p-2 bg-white hover:bg-gray-100 transition-colors rounded"
                       >
@@ -489,7 +489,7 @@ const onSubmit = async (data) => {
                           alt="Discord"
                           className="w-5 h-5 sm:w-6 sm:h-6"
                         />
-                      </button>
+                      </button> */}
                     </motion.div>
 
                     <motion.button

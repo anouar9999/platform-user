@@ -81,7 +81,7 @@ const handleLogoUpload = (e) => {
   if (e.target.files && e.target.files[0]) {
     const file = e.target.files[0];
     const formData = new FormData();
-    formData.append('team_id', team.id);
+    formData.append('team_id', teamStats.id); // CHANGE: was teamStats.data.id
     formData.append('logo', file);
 
     fetch(`${API_URL}/api/team_api.php?endpoint=team-settings`, {
@@ -117,7 +117,7 @@ const handleBannerUpload = (e) => {
   if (e.target.files && e.target.files[0]) {
     const file = e.target.files[0];
     const formData = new FormData();
-    formData.append('team_id', team.id);
+    formData.append('team_id', teamStats.id); // CHANGE: was team.id
     formData.append('banner', file);
 
     fetch(`${API_URL}/api/team_api.php?endpoint=team-settings`, {

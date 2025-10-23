@@ -346,14 +346,14 @@ export default function LoginPage() {
               </motion.div>
 
               {/* Social Login */}
-              <motion.div variants={formItemVariants} className="grid grid-cols-4 gap-3">
+              <motion.div variants={formItemVariants} className="grid grid-cols-1 gap-3">
                 <button
                   type="button"
                   className="flex items-center justify-center p-3 bg-white hover:bg-gray-100 transition-colors rounded-lg"
                 >
-                  <img src="https://auth.gbarena.com/assets/social-media-icons/facebook-icon.svg" alt="Facebook" className="w-6 h-6" />
+                  <img src="https://auth.gbarena.com/assets/social-media-icons/google-icon.svg" alt="Google" className="w-6 h-6" />
                 </button>
-                <button
+                {/* <button
                   type="button"
                   className="flex items-center justify-center p-3 bg-white hover:bg-gray-100 transition-colors rounded-lg"
                 >
@@ -370,7 +370,7 @@ export default function LoginPage() {
                   className="flex items-center justify-center p-3 bg-white hover:bg-gray-100 transition-colors rounded-lg"
                 >
                   <img src="https://auth.gbarena.com/assets/social-media-icons/discord-icon.svg" alt="Discord" className="w-6 h-6" />
-                </button>
+                </button> */}
               </motion.div>
 
               {/* Sign Up Link */}
@@ -387,7 +387,7 @@ export default function LoginPage() {
               </motion.div>
 
               {/* Footer Links */}
-              <motion.div
+              {/* <motion.div
                 variants={formItemVariants}
                 className="mt-8 flex justify-center space-x-4 text-xs text-gray-500"
               >
@@ -395,7 +395,7 @@ export default function LoginPage() {
                 <a href="#" className="hover:text-gray-400 transition-colors">Politique</a>
                 <a href="#" className="hover:text-gray-400 transition-colors">Modalités</a>
                 <a href="#" className="hover:text-gray-400 transition-colors">Cookies</a>
-              </motion.div>
+              </motion.div> */}
             </motion.div>
           </form>
         </div>
