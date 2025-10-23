@@ -39,7 +39,7 @@ const AnimatedCards = () => {
         image: "images/20250523_2358_Abstract_Game_Landscapes_simple_compose_01jvzjcqsyesps0bxff567n5cb.png",
         title: "Home",
         description: "Welcome to your gaming hub. Start your journey here with everything you need to get started.",
-	 link: `https://gnews.ma/`,
+	 link: `https://gamius.ma/`,
         enabled: true
       },
       {
@@ -327,7 +327,7 @@ export default AnimatedCards;
 //     image: "images/20250523_2358_Abstract_Game_Landscapes_simple_compose_01jvzjcqsyesps0bxff567n5cb.png",
 //     title: "Home",
 //     description: "Welcome to your gaming hub. Start your journey here with everything you need to get started.",
-//     link: "https://gnews.ma/",
+//     link: "https://gamius.ma/",
 //     enabled: true
 //   },
 //   {

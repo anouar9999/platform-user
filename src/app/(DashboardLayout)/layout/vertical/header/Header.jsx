@@ -47,7 +47,7 @@ const Header = ({ setIsMobileOpen }) => {
           </div>
 
           {/* Logo */}
-          <Link href="https://gnews.ma/" className="relative group flex-shrink-0">
+          <Link href="https://gamius.ma/" className="relative group flex-shrink-0">
             <div className="relative w-20 h-8 sm:w-24 sm:h-10 md:w-28 md:h-12 lg:w-32 lg:h-14 xl:w-36 xl:h-16 transition-all duration-300 group-hover:scale-105">
               {/* Corner accents on hover */}
               <div className="absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 border-orange-500 opacity-0 group-hover:opacity-100 transition-all duration-300"></div>

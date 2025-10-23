@@ -179,7 +179,7 @@ const ProfileDropdown = () => {
       if (window.location.hostname === 'localhost') {
         window.location.href = `http://localhost:5173/${noCache}`;
       } else {
-        window.location.href = `https://gnews.ma/${noCache}`;
+        window.location.href = `https://gamius.ma/${noCache}`;
       }
     } catch (error) {
       console.error("Frontend cleanup failed:", error);
@@ -342,7 +342,7 @@ const ProfileDropdown = () => {
               </div>
 
               <a
-                href={`https://gnews.ma`}
+                href={`https://gamius.ma`}
                 className="group/item relative flex items-center justify-between px-3 py-2 text-sm transition-all duration-300 overflow-hidden"
                 role="menuitem"
               >

@@ -26,7 +26,7 @@ const SingleTournament = ({ tournamentId }) => {
     setError(null);
 
     try {
-      const response = await fetch('https://api.gnews.ma/api/fetch_matches_bracket.php', {
+      const response = await fetch('https://api.gamius.ma/api/fetch_matches_bracket.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
