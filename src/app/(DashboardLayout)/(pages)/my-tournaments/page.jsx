@@ -28,7 +28,7 @@ const ParticipantTournaments = ({ participantId }) => {
     setUserId(parsedData.userId);
     console.log("User ID:", parsedData.userId);
 
-    if (true) {
+   if (true) {
       setIsLoading(true);
       fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/my-tournament.php?user_id=${parsedData.userId}`)
         .then((response) => {
